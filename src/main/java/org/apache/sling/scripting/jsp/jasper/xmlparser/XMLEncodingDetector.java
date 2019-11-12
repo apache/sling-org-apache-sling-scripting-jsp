@@ -1327,7 +1327,7 @@ public class XMLEncodingDetector {
             String name = scanPseudoAttribute(scanningTextDecl, fString);
             switch (state) {
                 case STATE_VERSION: {
-                    if (name == fVersionSymbol) {
+                    if (name == fVersionSymbol) { //NOSONAR
                         if (!sawSpace) {
                             reportFatalError(scanningTextDecl
                                        ? "jsp.error.xml.spaceRequiredBeforeVersionInTextDecl"
@@ -1343,7 +1343,7 @@ public class XMLEncodingDetector {
                             err.jspError("jsp.error.xml.versionNotSupported",
 					 version);
                         }
-                    } else if (name == fEncodingSymbol) {
+                    } else if (name == fEncodingSymbol) { //NOSONAR
                         if (!scanningTextDecl) {
                             err.jspError("jsp.error.xml.versionInfoRequired");
                         }
@@ -1366,7 +1366,7 @@ public class XMLEncodingDetector {
                     break;
                 }
                 case STATE_ENCODING: {
-                    if (name == fEncodingSymbol) {
+                    if (name == fEncodingSymbol) { //NOSONAR
                         if (!sawSpace) {
                             reportFatalError(scanningTextDecl
                                       ? "jsp.error.xml.spaceRequiredBeforeEncodingInTextDecl"
@@ -1377,7 +1377,7 @@ public class XMLEncodingDetector {
                         state = scanningTextDecl ? STATE_DONE : STATE_STANDALONE;
                         // TODO: check encoding name; set encoding on
                         //       entity scanner
-                    } else if (!scanningTextDecl && name == fStandaloneSymbol) {
+                    } else if (!scanningTextDecl && name == fStandaloneSymbol) { //NOSONAR
                         if (!sawSpace) {
                             err.jspError("jsp.error.xml.spaceRequiredBeforeStandalone");
                         }
@@ -1392,7 +1392,7 @@ public class XMLEncodingDetector {
                     break;
                 }
                 case STATE_STANDALONE: {
-                    if (name == fStandaloneSymbol) {
+                    if (name == fStandaloneSymbol) { //NOSONAR
                         if (!sawSpace) {
                             err.jspError("jsp.error.xml.spaceRequiredBeforeStandalone");
                         }

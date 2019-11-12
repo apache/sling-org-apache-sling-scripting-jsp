@@ -445,10 +445,10 @@ class TagFileProcessor {
         private void checkUniqueName(String name, String type, Node n,
                 TagAttributeInfo attr) throws JasperException {
 
-            HashMap table = (type == VAR_NAME_FROM) ? nameFromTable : nameTable;
+            HashMap table = (type == VAR_NAME_FROM) ? nameFromTable : nameTable; //NOSONAR
             NameEntry nameEntry = (NameEntry) table.get(name);
             if (nameEntry != null) {
-                if (type != TAG_DYNAMIC || nameEntry.getType() != TAG_DYNAMIC) {
+                if (type != TAG_DYNAMIC || nameEntry.getType() != TAG_DYNAMIC) { //NOSONAR
                     int line = nameEntry.getNode().getStart().getLineNumber();
                     err.jspError(n, "jsp.error.tagfile.nameNotUnique", type,
                             nameEntry.getType(), Integer.toString(line));
