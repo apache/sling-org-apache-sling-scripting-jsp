@@ -45,7 +45,10 @@ import javax.servlet.jsp.PageContext;
 
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
+import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.path.Path;
+import org.apache.sling.api.scripting.SlingBindings;
+import org.apache.sling.scripting.jsp.SlingJspPageContext;
 import org.apache.sling.scripting.jsp.jasper.Constants;
 import org.apache.sling.scripting.jsp.jasper.IOProvider;
 import org.apache.sling.scripting.jsp.jasper.Options;
@@ -102,9 +105,16 @@ public final class JspRuntimeContext {
                 ServletRequest paramServletRequest,
                 ServletResponse paramServletResponse, String paramString,
                 boolean paramBoolean1, int paramInt, boolean paramBoolean2) {
-            return this.getFactory().getPageContext(paramServlet, paramServletRequest,
+            PageContext context = this.getFactory().getPageContext(paramServlet, paramServletRequest,
                     paramServletResponse, paramString, paramBoolean1,
                     paramInt, paramBoolean2);
+            if (paramServletRequest instanceof SlingHttpServletRequest) {
+                SlingBindings slingBindings = (SlingBindings) paramServletRequest.getAttribute(SlingBindings.class.getName());
+                if (slingBindings != null) {
+                    context = new SlingJspPageContext(context, slingBindings);
+                }
+            }
+            return context;
         }
 
         @Override
