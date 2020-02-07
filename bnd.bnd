@@ -1,4 +1,8 @@
 ScriptEngine-Name:${project.name}
 ScriptEngine-Version:${project.version}
+Private-Package: org.apache.commons.lang3
 -conditionalpackage: org.apache.el.*
 -sources true
+
+src=src/main/java, ${repo; org.apache.commons:commons-lang3:jar:sources; 3.8.1}
+#-includeresource: OSGI-OPT/src=@${repo; repo; org.apache.commons:commons-lang3:jar:sources; 3.8.1}
