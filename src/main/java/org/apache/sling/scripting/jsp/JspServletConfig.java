@@ -76,4 +76,8 @@ class JspServletConfig implements ServletConfig {
         }
         return sb.toString();
     }
+
+    public Map<String, String> getProperties() {
+        return Collections.unmodifiableMap(properties);
+    }
 }

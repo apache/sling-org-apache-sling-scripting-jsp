@@ -41,7 +41,6 @@ import javax.servlet.jsp.tagext.TagInfo;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.apache.sling.api.SlingException;
-import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingIOException;
 import org.apache.sling.api.SlingServletException;
 import org.apache.sling.api.scripting.ScriptEvaluationException;
@@ -442,11 +441,8 @@ public class JspServletWrapper {
      *             request parameter has an illegal value.
      */
     public void service(final SlingBindings bindings) {
-        final SlingHttpServletRequest request = bindings.getRequest();
-        final Object oldValue = request.getAttribute(SlingBindings.class.getName());
         try {
-            request.setAttribute(SlingBindings.class.getName(), bindings);
-            service(request, bindings.getResponse());
+            service(bindings.getRequest(), bindings.getResponse());
         } catch (SlingException se) {
             // rethrow as is
             throw se;
@@ -454,8 +450,6 @@ public class JspServletWrapper {
             throw new SlingIOException(ioe);
         } catch (ServletException se) {
             throw new SlingServletException(se);
-        } finally {
-            request.setAttribute(SlingBindings.class.getName(), oldValue);
         }
     }
 

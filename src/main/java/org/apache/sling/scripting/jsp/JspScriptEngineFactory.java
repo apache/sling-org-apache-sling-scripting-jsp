@@ -16,15 +16,15 @@
  */
 package org.apache.sling.scripting.jsp;
 
-import static org.apache.sling.api.scripting.SlingBindings.SLING;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.script.Bindings;
 import javax.script.ScriptContext;
@@ -33,9 +33,7 @@ import javax.script.ScriptException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
-import org.apache.sling.api.SlingException;
 import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.SlingIOException;
 import org.apache.sling.api.SlingServletException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.observation.ExternalResourceChangeListener;
@@ -43,8 +41,6 @@ import org.apache.sling.api.resource.observation.ResourceChange;
 import org.apache.sling.api.resource.observation.ResourceChange.ChangeType;
 import org.apache.sling.api.resource.observation.ResourceChangeListener;
 import org.apache.sling.api.scripting.SlingBindings;
-import org.apache.sling.api.scripting.SlingScript;
-import org.apache.sling.api.scripting.SlingScriptConstants;
 import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.apache.sling.commons.classloader.ClassLoaderWriter;
 import org.apache.sling.commons.classloader.ClassLoaderWriterListener;
@@ -52,6 +48,7 @@ import org.apache.sling.commons.classloader.DynamicClassLoaderManager;
 import org.apache.sling.commons.compiler.JavaCompiler;
 import org.apache.sling.scripting.api.AbstractScriptEngineFactory;
 import org.apache.sling.scripting.api.AbstractSlingScriptEngine;
+import org.apache.sling.scripting.api.resource.ScriptingResourceResolverProvider;
 import org.apache.sling.scripting.jsp.jasper.compiler.JspRuntimeContext;
 import org.apache.sling.scripting.jsp.jasper.compiler.JspRuntimeContext.JspFactoryHandler;
 import org.apache.sling.scripting.jsp.jasper.runtime.AnnotationProcessor;
@@ -66,11 +63,14 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.apache.sling.api.scripting.SlingBindings.SLING;
 
 /**
  * The JSP engine (a.k.a Jasper).
@@ -171,17 +171,25 @@ public class JspScriptEngineFactory
     /** Default logger */
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    private static final Object BINDINGS_NOT_SWAPPED = new Object();
+
     private ServletContext slingServletContext;
+
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policyOption = ReferencePolicyOption.GREEDY)
+    private PrecompiledJSPRunner precompiledJSPRunner;
 
     @Reference
     private ClassLoaderWriter classLoaderWriter;
 
+    @Reference
+    private JavaCompiler javaCompiler;
+
+    @Reference
+    private ScriptingResourceResolverProvider scriptingResourceResolverProvider;
+
     private DynamicClassLoaderManager dynamicClassLoaderManager;
 
     private ClassLoader dynamicClassLoader;
-
-    @Reference
-    private JavaCompiler javaCompiler;
 
     /** The io provider for reading and writing. */
     private SlingIOProvider ioProvider;
@@ -189,10 +197,9 @@ public class JspScriptEngineFactory
     private SlingTldLocationsCache tldLocationsCache;
 
     private JspRuntimeContext jspRuntimeContext;
+    private ReentrantReadWriteLock jspRuntimeContextLock = new ReentrantReadWriteLock();
 
     private JspServletOptions options;
-
-    private JspServletContext jspServletContext;
 
     private JspServletConfig servletConfig;
 
@@ -246,105 +253,7 @@ public class JspScriptEngineFactory
         return super.getParameter(name);
     }
 
-    /**
-     * Call the error page
-     * @param bindings The bindings
-     * @param scriptHelper Script helper service
-     * @param context The script context
-     * @param scriptName The name of the script
-     */
-    private void callErrorPageJsp(final Bindings bindings,
-                                  final SlingScriptHelper scriptHelper,
-                                  final ScriptContext context,
-                                  final String scriptName) throws RuntimeException {
-    	final SlingBindings slingBindings = new SlingBindings();
-        slingBindings.putAll(bindings);
-
-        ResourceResolver resolver = (ResourceResolver) context.getAttribute(SlingScriptConstants.ATTR_SCRIPT_RESOURCE_RESOLVER,
-                SlingScriptConstants.SLING_SCOPE);
-        if ( resolver == null ) {
-            resolver = scriptHelper.getScript().getScriptResource().getResourceResolver();
-        }
-        final SlingIOProvider io = this.ioProvider;
-        final JspFactoryHandler jspfh = this.jspFactoryHandler;
-
-        // abort if JSP Support is shut down concurrently (SLING-2704)
-        if (io == null || jspfh == null) {
-            throw new RuntimeException("callJsp: JSP Script Engine seems to be shut down concurrently; not calling "+
-                    scriptHelper.getScript().getScriptResource().getPath());
-        }
-
-        final ResourceResolver oldResolver = io.setRequestResourceResolver(resolver);
-        jspfh.incUsage();
-		try {
-			final JspServletWrapper errorJsp = getJspWrapper(scriptName, slingBindings);
-			errorJsp.service(slingBindings);
-
-            // The error page could be inside an include.
-	        final SlingHttpServletRequest request = slingBindings.getRequest();
-            final Throwable t = (Throwable)request.getAttribute("javax.servlet.jsp.jspException");
-
-	        final Object newException = request
-                    .getAttribute("javax.servlet.error.exception");
-
-            // t==null means the attribute was not set.
-            if ((newException != null) && (newException == t)) {
-                request.removeAttribute("javax.servlet.error.exception");
-            }
-
-            // now clear the error code - to prevent double handling.
-            request.removeAttribute("javax.servlet.error.status_code");
-            request.removeAttribute("javax.servlet.error.request_uri");
-            request.removeAttribute("javax.servlet.error.status_code");
-            request.removeAttribute("javax.servlet.jsp.jspException");
-		} finally {
-            jspfh.decUsage();
-			io.resetRequestResourceResolver(oldResolver);
-		}
-     }
-
-    /**
-     * Call a JSP script
-     * @param bindings The bindings
-     * @param scriptHelper Script helper service
-     * @param context The script context
-     * @throws SlingServletException
-     * @throws SlingIOException
-     */
-    private void callJsp(final Bindings bindings,
-                         final SlingScriptHelper scriptHelper,
-                         final ScriptContext context) throws RuntimeException {
-
-        ResourceResolver resolver = (ResourceResolver) context.getAttribute(SlingScriptConstants.ATTR_SCRIPT_RESOURCE_RESOLVER,
-                SlingScriptConstants.SLING_SCOPE);
-        if ( resolver == null ) {
-            resolver = scriptHelper.getScript().getScriptResource().getResourceResolver();
-        }
-        final SlingIOProvider io = this.ioProvider;
-        final JspFactoryHandler jspfh = this.jspFactoryHandler;
-        // abort if JSP Support is shut down concurrently (SLING-2704)
-        if (io == null || jspfh == null) {
-            throw new RuntimeException("callJsp: JSP Script Engine seems to be shut down concurrently; not calling "+
-                    scriptHelper.getScript().getScriptResource().getPath());
-        }
-
-        final ResourceResolver oldResolver = io.setRequestResourceResolver(resolver);
-        jspfh.incUsage();
-        try {
-            final SlingBindings slingBindings = new SlingBindings();
-            slingBindings.putAll(bindings);
-
-            final JspServletWrapper jsp = getJspWrapper(scriptHelper, slingBindings);
-            // create a SlingBindings object
-            jsp.service(slingBindings);
-        } finally {
-            jspfh.decUsage();
-            io.resetRequestResourceResolver(oldResolver);
-        }
-    }
-
-    private JspServletWrapper getJspWrapper(final String scriptName, final SlingBindings bindings)
-    throws SlingException {
+    private JspServletWrapper getJspWrapper(final String scriptName) {
         JspRuntimeContext rctxt = this.getJspRuntimeContext();
 
     	JspServletWrapper wrapper = rctxt.getWrapper(scriptName);
@@ -370,13 +279,6 @@ public class JspScriptEngineFactory
         wrapper = rctxt.addWrapper(scriptName, wrapper);
 
         return wrapper;
-    }
-
-    private JspServletWrapper getJspWrapper(final SlingScriptHelper scriptHelper, final SlingBindings bindings)
-    throws SlingException {
-        final SlingScript script = scriptHelper.getScript();
-        final String scriptName = script.getScriptResource().getPath();
-        return getJspWrapper(scriptName, bindings);
     }
 
     // ---------- SCR integration ----------------------------------------------
@@ -407,7 +309,7 @@ public class JspScriptEngineFactory
             options = new JspServletOptions(slingServletContext, ioProvider,
                     properties, tldLocationsCache);
 
-            jspServletContext = new JspServletContext(ioProvider,
+            JspServletContext jspServletContext = new JspServletContext(ioProvider,
                 slingServletContext, tldLocationsCache);
 
             servletConfig = new JspServletConfig(jspServletContext, options.getProperties());
@@ -454,16 +356,14 @@ public class JspScriptEngineFactory
     private void checkJasperConfig() {
         boolean changed = false;
         InputStream is = null;
-        try {
+        try (final ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             is = this.classLoaderWriter.getInputStream(CONFIG_PATH);
-            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
             byte[] buffer = new byte[1024];
             int length = 0;
             while ( ( length = is.read(buffer)) != -1 ) {
                 baos.write(buffer, 0, length);
             }
-            baos.close();
-            final String oldKey = new String(baos.toByteArray(), "UTF-8");
+            final String oldKey = new String(baos.toByteArray(), StandardCharsets.UTF_8);
             changed = !oldKey.equals(this.servletConfig.getConfigKey());
             if ( changed ) {
                 logger.info("Removing all class files due to jsp configuration change");
@@ -480,20 +380,10 @@ public class JspScriptEngineFactory
             }
         }
         if ( changed ) {
-            OutputStream os = null;
-            try {
-                os = this.classLoaderWriter.getOutputStream(CONFIG_PATH);
-                os.write(this.servletConfig.getConfigKey().getBytes("UTF-8"));
-            } catch ( final IOException ignore ) {
+            try (OutputStream os = this.classLoaderWriter.getOutputStream(CONFIG_PATH)) {
+                os.write(this.servletConfig.getConfigKey().getBytes(StandardCharsets.UTF_8));
+            } catch (final IOException ignore) {
                 // ignore
-            } finally {
-                if ( os != null ) {
-                    try {
-                        os.close();
-                    } catch ( final IOException ignore ) {
-                        // ignore
-                    }
-                }
             }
             this.classLoaderWriter.delete("/org/apache/jsp");
         }
@@ -540,7 +430,7 @@ public class JspScriptEngineFactory
     /**
      * Bind the class load provider.
      *
-     * @param repositoryClassLoaderProvider the new provider
+     * @param rclp the new provider
      */
     @Reference(cardinality=ReferenceCardinality.MANDATORY, policy=ReferencePolicy.STATIC)
     protected void bindDynamicClassLoaderManager(final DynamicClassLoaderManager rclp) {
@@ -552,7 +442,7 @@ public class JspScriptEngineFactory
 
     /**
      * Unbind the class loader provider.
-     * @param repositoryClassLoaderProvider the old provider
+     * @param rclp the old provider
      */
     protected void unbindDynamicClassLoaderManager(final DynamicClassLoaderManager rclp) {
         if ( this.dynamicClassLoaderManager == rclp ) {
@@ -584,10 +474,97 @@ public class JspScriptEngineFactory
             super(JspScriptEngineFactory.this);
         }
 
+        /**
+         * Call a JSP script
+         * @param slingBindings The bindings
+         */
+        private void callJsp(final SlingBindings slingBindings) {
+            SlingScriptHelper scriptHelper = slingBindings.getSling();
+            if (scriptHelper == null) {
+                throw new IllegalStateException(String.format("The %s variable is missing from the bindings.", SLING));
+            }
+            ResourceResolver resolver = scriptingResourceResolverProvider.getRequestScopedResourceResolver();
+            if ( resolver == null ) {
+                resolver = scriptHelper.getScript().getScriptResource().getResourceResolver();
+            }
+            final SlingIOProvider io = ioProvider;
+            final JspFactoryHandler jspfh = jspFactoryHandler;
+            // abort if JSP Support is shut down concurrently (SLING-2704)
+            if (io == null || jspfh == null) {
+                throw new RuntimeException("callJsp: JSP Script Engine seems to be shut down concurrently; not calling "+
+                        scriptHelper.getScript().getScriptResource().getPath());
+            }
+
+            final ResourceResolver oldResolver = io.setRequestResourceResolver(resolver);
+            jspfh.incUsage();
+            try {
+                final JspServletWrapper jsp = getJspWrapper(scriptHelper.getScript().getScriptResource().getPath());
+                jsp.service(slingBindings);
+            } finally {
+                jspfh.decUsage();
+                io.resetRequestResourceResolver(oldResolver);
+            }
+        }
+
+        /**
+         * Call the error page
+         * @param slingBindings The bindings
+         * @param scriptName The name of the script
+         */
+        private void callErrorPageJsp(final SlingBindings slingBindings, final String scriptName) {
+            SlingScriptHelper scriptHelper = slingBindings.getSling();
+            if (scriptHelper == null) {
+                throw new IllegalStateException(String.format("The %s variable is missing from the bindings.", SLING));
+            }
+            ResourceResolver resolver = scriptingResourceResolverProvider.getRequestScopedResourceResolver();
+            if ( resolver == null ) {
+                resolver = scriptHelper.getScript().getScriptResource().getResourceResolver();
+            }
+            final SlingIOProvider io = ioProvider;
+            final JspFactoryHandler jspfh = jspFactoryHandler;
+
+            // abort if JSP Support is shut down concurrently (SLING-2704)
+            if (io == null || jspfh == null) {
+                throw new RuntimeException("callJsp: JSP Script Engine seems to be shut down concurrently; not calling "+
+                        scriptHelper.getScript().getScriptResource().getPath());
+            }
+
+            final ResourceResolver oldResolver = io.setRequestResourceResolver(resolver);
+            jspfh.incUsage();
+            try {
+                final JspServletWrapper errorJsp = getJspWrapper(scriptName);
+                errorJsp.service(slingBindings);
+
+                // The error page could be inside an include.
+                final SlingHttpServletRequest request = slingBindings.getRequest();
+                if (request != null) {
+                    final Throwable t = (Throwable) request.getAttribute("javax.servlet.jsp.jspException");
+
+                    final Object newException = request
+                            .getAttribute("javax.servlet.error.exception");
+
+                    // t==null means the attribute was not set.
+                    if ((newException != null) && (newException == t)) {
+                        request.removeAttribute("javax.servlet.error.exception");
+                    }
+
+                    // now clear the error code - to prevent double handling.
+                    request.removeAttribute("javax.servlet.error.status_code");
+                    request.removeAttribute("javax.servlet.error.request_uri");
+                    request.removeAttribute("javax.servlet.error.status_code");
+                    request.removeAttribute("javax.servlet.jsp.jspException");
+                }
+            } finally {
+                jspfh.decUsage();
+                io.resetRequestResourceResolver(oldResolver);
+            }
+        }
+
         @Override
-        public Object eval(final Reader script, final ScriptContext context)
-                throws ScriptException {
+        public Object eval(final Reader script, final ScriptContext context) throws ScriptException {
             Bindings props = context.getBindings(ScriptContext.ENGINE_SCOPE);
+            SlingBindings slingBindings = new SlingBindings();
+            slingBindings.putAll(props);
             SlingScriptHelper scriptHelper = (SlingScriptHelper) props.get(SLING);
             if (scriptHelper != null) {
 
@@ -596,8 +573,20 @@ public class JspScriptEngineFactory
                 ClassLoader old = Thread.currentThread().getContextClassLoader();
                 Thread.currentThread().setContextClassLoader(dynamicClassLoader);
 
+                SlingHttpServletRequest request = slingBindings.getRequest();
+                Object oldSlingBindings = BINDINGS_NOT_SWAPPED;
+                if (request != null) {
+                    oldSlingBindings = request.getAttribute(SlingBindings.class.getName());
+                    request.setAttribute(SlingBindings.class.getName(), slingBindings);
+                }
                 try {
-                    callJsp(props, scriptHelper, context);
+                    boolean contextHasPrecompiledJsp = false;
+                    if (precompiledJSPRunner != null) {
+                        contextHasPrecompiledJsp = precompiledJSPRunner.callPrecompiledJSP(jspFactoryHandler, servletConfig, slingBindings);
+                    }
+                    if (!contextHasPrecompiledJsp) {
+                        callJsp(slingBindings);
+                    }
                 } catch (final SlingServletException e) {
                     // ServletExceptions use getRootCause() instead of getCause(),
                     // so we have to extract the actual root cause and pass it as
@@ -618,9 +607,8 @@ public class JspScriptEngineFactory
                     throw new BetterScriptException(e.getMessage(), e);
                 } catch (final SlingPageException sje) {
                     try {
-                        callErrorPageJsp(props, scriptHelper, context, sje.getErrorPage());
-                    }
-                    catch (final Exception e) {
+                        callErrorPageJsp(slingBindings, sje.getErrorPage());
+                    } catch (final Exception e) {
 
                         throw new BetterScriptException(e.getMessage(), e);
                     }
@@ -634,7 +622,9 @@ public class JspScriptEngineFactory
                     // make sure the context loader is reset after setting up the
                     // JSP runtime context
                     Thread.currentThread().setContextClassLoader(old);
-
+                    if (request != null && oldSlingBindings != BINDINGS_NOT_SWAPPED) {
+                        request.setAttribute(SlingBindings.class.getName(), oldSlingBindings);
+                    }
                 }
             }
             return null;
@@ -654,16 +644,23 @@ public class JspScriptEngineFactory
     }
 
     private JspRuntimeContext getJspRuntimeContext() {
-        if ( this.jspRuntimeContext == null ) {
-            synchronized ( this ) {
-                if ( this.jspRuntimeContext == null ) {
-                    // Initialize the JSP Runtime Context
-                    this.jspRuntimeContext = new JspRuntimeContext(slingServletContext,
-                            options, ioProvider);
-                }
+        jspRuntimeContextLock.readLock().lock();
+        if (jspRuntimeContext == null) {
+            jspRuntimeContextLock.readLock().unlock();
+            jspRuntimeContextLock.writeLock().lock();
+            try {
+                jspRuntimeContext = new JspRuntimeContext(slingServletContext,
+                        options, ioProvider);
+                jspRuntimeContextLock.readLock().lock();
+            } finally {
+                jspRuntimeContextLock.writeLock().unlock();
             }
         }
-        return this.jspRuntimeContext;
+        try {
+            return jspRuntimeContext;
+        } finally {
+            jspRuntimeContextLock.readLock().unlock();
+        }
     }
 
     /**
@@ -717,7 +714,7 @@ public class JspScriptEngineFactory
         };
         t.start();
     }
-    
+
 	@Override
 	public void onClassLoaderClear(String context) {
         final JspRuntimeContext rctxt = this.jspRuntimeContext;
