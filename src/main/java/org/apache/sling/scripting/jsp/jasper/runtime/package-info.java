@@ -16,6 +16,9 @@
  ~ specific language governing permissions and limitations
  ~ under the License.
  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+/**
+ * This package should only be used by compiled JSP scripts when being executed on the platform.
+ */
 @Version("2.5.0")
 package org.apache.sling.scripting.jsp.jasper.runtime;
 

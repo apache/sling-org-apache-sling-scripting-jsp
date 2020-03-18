@@ -35,83 +35,53 @@ import org.apache.sling.scripting.jsp.jasper.compiler.JspRuntimeContext;
 import org.apache.sling.scripting.jsp.jasper.runtime.AnnotationProcessor;
 import org.apache.sling.scripting.jsp.jasper.runtime.HttpJspBase;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(
-        immediate = true,
-        service = {}
-        /*
-         * this component will register itself as a service only if the org.apache.sling.scripting.bundle.tracker API is present
-         */
-        )
+@Component(service = {PrecompiledJSPRunner.class})
 public class PrecompiledJSPRunner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PrecompiledJSPRunner.class);
 
-    private final ServiceRegistration<?> serviceRegistration;
-
-    @Activate
-    public PrecompiledJSPRunner(BundleContext bundleContext) {
-        serviceRegistration = register(bundleContext);
-    }
-
-    @Deactivate
-    public void deactivate() {
-        if (serviceRegistration != null) {
-            serviceRegistration.unregister();
-        }
-    }
-
     boolean callPrecompiledJSP(JspRuntimeContext.JspFactoryHandler jspFactoryHandler, JspServletConfig jspServletConfig,
                                SlingBindings bindings) {
         boolean found = false;
-        BundledRenderUnit bundledRenderUnit = (BundledRenderUnit) bindings.get(BundledRenderUnit.VARIABLE);
-        if (bundledRenderUnit != null && bundledRenderUnit.getUnit() instanceof HttpJspBase) {
-            found = true;
-            HttpJspBase jsp = (HttpJspBase) bundledRenderUnit.getUnit();
-            PrecompiledServletConfig servletConfig = new PrecompiledServletConfig(jspServletConfig, bundledRenderUnit);
-            try {
-                jspFactoryHandler.incUsage();
-                AnnotationProcessor annotationProcessor =
-                        (AnnotationProcessor) jspServletConfig.getServletContext().getAttribute(AnnotationProcessor.class.getName());
-                if (annotationProcessor != null) {
-                    annotationProcessor.processAnnotations(jsp);
-                    annotationProcessor.postConstruct(jsp);
-                }
+        HttpJspBase jsp = null;
+        try {
+            jspFactoryHandler.incUsage();
+            BundledRenderUnit bundledRenderUnit = (BundledRenderUnit) bindings.get(BundledRenderUnit.VARIABLE);
+            if (bundledRenderUnit != null && bundledRenderUnit.getUnit() instanceof HttpJspBase) {
+                found = true;
+                jsp = (HttpJspBase) bundledRenderUnit.getUnit();
                 if (jsp.getServletConfig() == null) {
+                    PrecompiledServletConfig servletConfig = new PrecompiledServletConfig(jspServletConfig, bundledRenderUnit);
+                    AnnotationProcessor annotationProcessor =
+                            (AnnotationProcessor) jspServletConfig.getServletContext().getAttribute(AnnotationProcessor.class.getName());
+                    if (annotationProcessor != null) {
+                        annotationProcessor.processAnnotations(jsp);
+                        annotationProcessor.postConstruct(jsp);
+                    }
                     jsp.init(servletConfig);
                 }
                 jsp.service(bindings.getRequest(), bindings.getResponse());
-            } catch (IOException e) {
-                throw new SlingIOException(e);
-            } catch (ServletException e) {
-                throw new SlingServletException(e);
-            } catch (IllegalAccessException | InvocationTargetException | NamingException e) {
-                throw new SlingException("Unable to process annotations for servlet " + servletConfig.getServletName() + ".", e);
-            } finally {
-                jspFactoryHandler.decUsage();
+
             }
+        } catch (IllegalAccessException | InvocationTargetException | NamingException e) {
+            throw new SlingException("Unable to process annotations for servlet " + jsp.getClass().getName() + ".", e);
+        } catch (NoClassDefFoundError ignored) {
+            // wave your hands like we don't care - we're missing support for precompiled JSPs
+        } catch (IOException e) {
+            throw new SlingIOException(e);
+        } catch (ServletException e) {
+            throw new SlingServletException(e);
+        } finally {
+            jspFactoryHandler.decUsage();
         }
         return found;
     }
 
-    private ServiceRegistration<?> register(BundleContext bundleContext) {
-        try {
-            PrecompiledJSPRunner.class.getClassLoader().loadClass("org.apache.sling.scripting.bundle.tracker.BundledRenderUnit");
-            return bundleContext.registerService(PrecompiledJSPRunner.class, this, null);
-        } catch (Exception e) {
-            LOGGER.info("No support for precompiled scripts.");
-        }
-        return null;
-    }
-
-    public static class PrecompiledServletConfig extends JspServletConfig {
+    private static class PrecompiledServletConfig extends JspServletConfig {
 
         private final BundledRenderUnit bundledRenderUnit;
         private String servletName;
