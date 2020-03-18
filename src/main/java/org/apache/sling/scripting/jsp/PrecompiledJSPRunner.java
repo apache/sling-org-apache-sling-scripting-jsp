@@ -36,13 +36,9 @@ import org.apache.sling.scripting.jsp.jasper.runtime.AnnotationProcessor;
 import org.apache.sling.scripting.jsp.jasper.runtime.HttpJspBase;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.annotations.Component;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Component(service = {PrecompiledJSPRunner.class})
 public class PrecompiledJSPRunner {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(PrecompiledJSPRunner.class);
 
     boolean callPrecompiledJSP(JspRuntimeContext.JspFactoryHandler jspFactoryHandler, JspServletConfig jspServletConfig,
                                SlingBindings bindings) {
