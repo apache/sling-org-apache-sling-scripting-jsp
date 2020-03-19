@@ -50,17 +50,19 @@ public class PrecompiledJSPRunner {
             if (bundledRenderUnit != null && bundledRenderUnit.getUnit() instanceof HttpJspBase) {
                 found = true;
                 jsp = (HttpJspBase) bundledRenderUnit.getUnit();
-                synchronized (this) {
-                    if (jsp.getServletConfig() == null) {
-                        PrecompiledServletConfig servletConfig = new PrecompiledServletConfig(jspServletConfig, bundledRenderUnit);
-                        AnnotationProcessor annotationProcessor =
-                                (AnnotationProcessor) jspServletConfig.getServletContext()
-                                        .getAttribute(AnnotationProcessor.class.getName());
-                        if (annotationProcessor != null) {
-                            annotationProcessor.processAnnotations(jsp);
-                            annotationProcessor.postConstruct(jsp);
+                if (jsp.getServletConfig() == null) {
+                    synchronized (this) {
+                        if (jsp.getServletConfig() == null) {
+                            PrecompiledServletConfig servletConfig = new PrecompiledServletConfig(jspServletConfig, bundledRenderUnit);
+                            AnnotationProcessor annotationProcessor =
+                                    (AnnotationProcessor) jspServletConfig.getServletContext()
+                                            .getAttribute(AnnotationProcessor.class.getName());
+                            if (annotationProcessor != null) {
+                                annotationProcessor.processAnnotations(jsp);
+                                annotationProcessor.postConstruct(jsp);
+                            }
+                            jsp.init(servletConfig);
                         }
-                        jsp.init(servletConfig);
                     }
                 }
                 jsp.service(bindings.getRequest(), bindings.getResponse());
