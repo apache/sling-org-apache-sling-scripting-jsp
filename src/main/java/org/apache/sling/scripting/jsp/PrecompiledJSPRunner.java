@@ -21,6 +21,7 @@ package org.apache.sling.scripting.jsp;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.naming.NamingException;
 import javax.servlet.ServletException;
@@ -40,6 +41,8 @@ import org.osgi.service.component.annotations.Component;
 @Component(service = {PrecompiledJSPRunner.class})
 public class PrecompiledJSPRunner {
 
+    private final ConcurrentHashMap<HttpJspBase, Object> locks = new ConcurrentHashMap<>();
+
     boolean callPrecompiledJSP(JspRuntimeContext.JspFactoryHandler jspFactoryHandler, JspServletConfig jspServletConfig,
                                SlingBindings bindings) {
         boolean found = false;
@@ -51,7 +54,8 @@ public class PrecompiledJSPRunner {
                 found = true;
                 jsp = (HttpJspBase) bundledRenderUnit.getUnit();
                 if (jsp.getServletConfig() == null) {
-                    synchronized (this) {
+                    Object lock = locks.computeIfAbsent(jsp, key -> new Object());
+                    synchronized (lock) {
                         if (jsp.getServletConfig() == null) {
                             PrecompiledServletConfig servletConfig = new PrecompiledServletConfig(jspServletConfig, bundledRenderUnit);
                             AnnotationProcessor annotationProcessor =
@@ -78,6 +82,9 @@ public class PrecompiledJSPRunner {
             throw new SlingServletException(e);
         } finally {
             jspFactoryHandler.decUsage();
+            if (jsp != null) {
+                locks.remove(jsp);
+            }
         }
         return found;
     }
