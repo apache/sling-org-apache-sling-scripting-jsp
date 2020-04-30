@@ -175,7 +175,7 @@ public class JspScriptEngineFactory
 
     private ServletContext slingServletContext;
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policyOption = ReferencePolicyOption.GREEDY)
+    @Reference
     private PrecompiledJSPRunner precompiledJSPRunner;
 
     @Reference
@@ -580,10 +580,9 @@ public class JspScriptEngineFactory
                     request.setAttribute(SlingBindings.class.getName(), slingBindings);
                 }
                 try {
-                    boolean contextHasPrecompiledJsp = false;
-                    if (precompiledJSPRunner != null) {
-                        contextHasPrecompiledJsp = precompiledJSPRunner.callPrecompiledJSP(jspFactoryHandler, servletConfig, slingBindings);
-                    }
+                    boolean contextHasPrecompiledJsp = precompiledJSPRunner
+                        .callPrecompiledJSP(jspFactoryHandler, servletConfig, slingBindings);
+
                     if (!contextHasPrecompiledJsp) {
                         callJsp(slingBindings);
                     }
