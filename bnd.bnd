@@ -1,5 +1,4 @@
 ScriptEngine-Name:${project.name}
 ScriptEngine-Version:${project.version}
-Import-Package:     org.apache.sling.scripting.bundle.tracker.*;resolution:=optional, \\
-                    *
+Import-Package: *
 -conditionalpackage: org.apache.el.*
