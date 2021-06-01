@@ -313,7 +313,9 @@ public abstract class Compiler {
             // memory footprint.
             tfp = null;
             errDispatcher = null;
-            pageInfo = null;
+            if (!jspcMode) {
+                pageInfo = null;
+            }
 
             // Only get rid of the pageNodes if in production.
             // In development mode, they are used for detailed

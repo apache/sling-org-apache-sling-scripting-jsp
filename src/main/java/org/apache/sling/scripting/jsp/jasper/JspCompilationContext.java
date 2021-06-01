@@ -495,10 +495,14 @@ public class JspCompilationContext {
     // ==================== Compile and reload ====================
 
     public JasperException compile() {
+        return compile(false);
+    }
+
+    public JasperException compile(boolean fromJSPC) {
         final Compiler c = createCompiler();
         try {
             c.removeGeneratedFiles();
-            c.compile();
+            c.compile(true, fromJSPC);
         } catch (final JasperException ex) {
             return ex;
         } catch (final IOException ioe) {
@@ -508,11 +512,11 @@ public class JspCompilationContext {
             return je;
         } catch (final Exception ex) {
             JasperException je = new JasperException(
-                        Localizer.getMessage("jsp.error.unable.compile"),
-                        ex);
+                    Localizer.getMessage("jsp.error.unable.compile"),
+                    ex);
             return je;
         } finally {
-           c.clean();
+            c.clean();
         }
 
         return null;
