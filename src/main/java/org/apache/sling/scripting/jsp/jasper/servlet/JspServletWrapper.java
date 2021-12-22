@@ -612,7 +612,7 @@ public class JspServletWrapper {
     private Exception handleJspExceptionInternal(final Exception ex)
     throws ServletException {
     	Throwable realException = ex;
-        String exMessage = "";
+        String exMessage = realException.getMessage();
         if (ex instanceof ServletException) {
             realException = ((ServletException) ex).getRootCause();
             // root cause might be null (eg. for a JasperException ex)
@@ -626,6 +626,7 @@ public class JspServletWrapper {
         // avoid nested ScriptEvaluationExceptions (eg. in nested jsp includes)
         while (realException instanceof ScriptEvaluationException) {
             realException = realException.getCause();
+            exMessage = realException.getMessage();
         }
 
         try {
