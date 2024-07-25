@@ -479,6 +479,7 @@ public class JspScriptEngineFactory
             }
             ResourceResolver resolver = scriptingResourceResolverProvider.getRequestScopedResourceResolver();
             if ( resolver == null ) {
+                logger.info("No request-scoped ResourceResolver found, falling back to the script-resource ResourceResolver");
                 resolver = scriptHelper.getScript().getScriptResource().getResourceResolver();
             }
             final SlingIOProvider io = ioProvider;
@@ -489,6 +490,7 @@ public class JspScriptEngineFactory
                         scriptHelper.getScript().getScriptResource().getPath());
             }
 
+            logger.info("Setting IOProvider ResourceResolver with user {}", resolver.getUserID());
             final ResourceResolver oldResolver = io.setRequestResourceResolver(resolver);
             jspfh.incUsage();
             try {

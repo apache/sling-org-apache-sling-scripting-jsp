@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -121,6 +122,7 @@ class SlingIOProvider implements IOProvider {
                 if (resource != null) {
                     ResourceMetadata meta = resource.getResourceMetadata();
                     long modTime = meta.getModificationTime();
+                    log.info("Raw last modified date for resource " + resource.getPath() + " is " + Instant.ofEpochMilli(modTime));
                     return (modTime > 0) ? modTime : 0;
                 }
             } catch (final SlingException se) {

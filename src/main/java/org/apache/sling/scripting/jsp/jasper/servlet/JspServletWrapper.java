@@ -23,8 +23,8 @@ import java.io.LineNumberReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URL;
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -386,6 +386,9 @@ public class JspServletWrapper {
         // check if class file exists
         final String targetFile = ctxt.getClassFileName();
         final long targetLastModified = ctxt.getRuntimeContext().getIOProvider().lastModified(targetFile);
+        if (log.isInfoEnabled()) {
+            log.info("Last modified date for " + targetFile + " is " + Instant.ofEpochMilli(targetLastModified));
+        }
         if (targetLastModified < 0) {
             return true;
         }
@@ -393,6 +396,9 @@ public class JspServletWrapper {
         // compare jsp time stamp with class file time stamp
         final String jsp = ctxt.getJspFile();
         final long jspRealLastModified = ctxt.getRuntimeContext().getIOProvider().lastModified(jsp);
+        if (log.isInfoEnabled()) {
+            log.info("Last modified date for JSP " + jsp + " is " + Instant.ofEpochMilli(jspRealLastModified));
+        }
         if (targetLastModified < jspRealLastModified) {
             if (log.isDebugEnabled()) {
                 log.debug("Compiler: outdated: " + targetFile + " "
@@ -412,6 +418,7 @@ public class JspServletWrapper {
                     continue;
                 }
                 final long includeLastModified = ctxt.getRuntimeContext().getIOProvider().lastModified(include);
+                log.info("Last modified date for include " + include + " is " + Instant.ofEpochMilli(includeLastModified));
 
                 if (includeLastModified > targetLastModified) {
                     if (log.isDebugEnabled()) {

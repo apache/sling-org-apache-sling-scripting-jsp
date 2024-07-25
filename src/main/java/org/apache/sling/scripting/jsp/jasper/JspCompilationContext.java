@@ -53,6 +53,9 @@ import org.apache.sling.scripting.jsp.jasper.compiler.ServletWriter;
  */
 public class JspCompilationContext {
 
+    private final org.apache.juli.logging.Log LOG =
+            org.apache.juli.logging.LogFactory.getLog(Compiler.class);
+
     private final Map<String, URL> tagFileJarUrls;
 
     private volatile String className;
@@ -511,20 +514,17 @@ public class JspCompilationContext {
     public JasperException compile() {
         final Compiler c = createCompiler();
         try {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Removing generated files before compiling " + this.jspUri);
+            }
             c.removeGeneratedFiles();
             c.compile(true, false);
         } catch (final JasperException ex) {
             return ex;
-        } catch (final IOException ioe) {
-            final JasperException je = new JasperException(
-                    Localizer.getMessage("jsp.error.unable.compile"),
-                    ioe);
-            return je;
         } catch (final Exception ex) {
-            JasperException je = new JasperException(
+            return new JasperException(
                     Localizer.getMessage("jsp.error.unable.compile"),
                     ex);
-            return je;
         } finally {
             c.clean();
         }

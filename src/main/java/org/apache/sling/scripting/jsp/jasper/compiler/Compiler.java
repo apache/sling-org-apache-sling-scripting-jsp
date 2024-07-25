@@ -344,28 +344,17 @@ public abstract class Compiler {
      * Remove generated files
      */
     public void removeGeneratedFiles() {
-        this.removeGeneratedClassFiles();
-        try {
-            String javaFileName = ctxt.getServletJavaFileName();
-            if (javaFileName != null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Deleting " + javaFileName);
-                }
-                ctxt.delete(javaFileName);
-            }
-        } catch (Exception e) {
-            // Remove as much as possible, ignore possible exceptions
-        }
+        removeFile(ctxt.getClassFileName());
+        removeFile(ctxt.getServletJavaFileName());
     }
 
-    public void removeGeneratedClassFiles() {
+    private void removeFile(String filePath) {
         try {
-            String classFileName = ctxt.getClassFileName();
-            if (classFileName != null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Deleting " + classFileName);
+            if (filePath != null) {
+                if (log.isInfoEnabled()) {
+                    log.info("Deleting " + filePath);
                 }
-                ctxt.delete(classFileName);
+                ctxt.delete(filePath);
             }
         } catch (Exception e) {
             // Remove as much as possible, ignore possible exceptions

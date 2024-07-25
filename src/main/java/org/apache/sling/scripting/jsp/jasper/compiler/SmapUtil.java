@@ -18,12 +18,14 @@
 package org.apache.sling.scripting.jsp.jasper.compiler;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.NoSuchFileException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -191,7 +193,7 @@ public class SmapUtil {
     // Installation logic (from Robert Field, JSR-045 spec lead)
     private static class SDEInstaller {
 
-        private org.apache.juli.logging.Log log=
+        private static final org.apache.juli.logging.Log log =
                 org.apache.juli.logging.LogFactory.getLog( SDEInstaller.class );
 
         static final String nameSDE = "SourceDebugExtension";
@@ -241,12 +243,32 @@ public class SmapUtil {
         static void install(JspCompilationContext ctxt, String classFile, byte[] smap) throws IOException {
             String tmpFile = classFile + "tmp";
             new SDEInstaller(ctxt, classFile, smap, tmpFile);
+            if (log.isInfoEnabled()) {
+                String existence = existence(ctxt, classFile);
+                log.info("Trying to delete previous class file, which " + existence + " before smap installation" + classFile);
+            }
             if (!ctxt.delete(classFile)) {
                 throw new IOException("classFile.delete() failed");
             }
             if (!ctxt.rename(tmpFile, classFile)) {
+                if (log.isInfoEnabled()) {
+                    log.info("Failed to rename tmp class file "
+                            + tmpFile + " (which " + existence(ctxt, tmpFile) + ") to "
+                            + classFile+ " (which " + existence(ctxt, classFile) + ")");
+                }
                 throw new IOException("tmpFile.renameTo(classFile) failed (" + tmpFile + " -> " + classFile + ")");
             }
+        }
+
+        private static String existence(JspCompilationContext ctxt, String classFile) throws IOException {
+            boolean exists;
+            try {
+                ctxt.getInputStream(classFile); // should throw FNFE if the file does not exist
+                exists = true;
+            } catch (FileNotFoundException | NoSuchFileException e) {
+                exists = false;
+            }
+            return exists ? "exists" : "does not exist";
         }
 
         SDEInstaller(JspCompilationContext ctxt, String inClassFile, byte[] sdeAttr, String outClassFile)
