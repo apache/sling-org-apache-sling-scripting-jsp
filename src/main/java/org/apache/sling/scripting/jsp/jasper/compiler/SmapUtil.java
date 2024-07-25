@@ -29,6 +29,7 @@ import java.nio.file.NoSuchFileException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.sling.scripting.jsp.jasper.JasperException;
 import org.apache.sling.scripting.jsp.jasper.JspCompilationContext;
@@ -240,23 +241,37 @@ public class SmapUtil {
         //            }
         //        }
         //
+
+        private static final ConcurrentHashMap<String, Exception> DIAGNOSTICS = new ConcurrentHashMap<>();
+
         static void install(JspCompilationContext ctxt, String classFile, byte[] smap) throws IOException {
-            String tmpFile = classFile + "tmp";
-            new SDEInstaller(ctxt, classFile, smap, tmpFile);
-            if (log.isInfoEnabled()) {
-                String existence = existence(ctxt, classFile);
-                log.info("Trying to delete previous class file, which " + existence + " before smap installation" + classFile);
-            }
-            if (!ctxt.delete(classFile)) {
-                throw new IOException("classFile.delete() failed");
-            }
-            if (!ctxt.rename(tmpFile, classFile)) {
-                if (log.isInfoEnabled()) {
-                    log.info("Failed to rename tmp class file "
-                            + tmpFile + " (which " + existence(ctxt, tmpFile) + ") to "
-                            + classFile+ " (which " + existence(ctxt, classFile) + ")");
+            Exception ourTrace = new Exception("diagnostic stack trace from thread " + Thread.currentThread().getName());
+            Exception otherTrace = DIAGNOSTICS.put(classFile, ourTrace);
+            try {
+                if (otherTrace != null) {
+                    log.warn("Race condition found for class file " + classFile);
+                    log.warn("Our stack trace", ourTrace);
+                    log.warn("Other stack trace" + otherTrace);
                 }
-                throw new IOException("tmpFile.renameTo(classFile) failed (" + tmpFile + " -> " + classFile + ")");
+                String tmpFile = classFile + "tmp";
+                new SDEInstaller(ctxt, classFile, smap, tmpFile);
+                if (log.isInfoEnabled()) {
+                    String existence = existence(ctxt, classFile);
+                    log.info("Trying to delete previous class file, which " + existence + " before smap installation" + classFile);
+                }
+                if (!ctxt.delete(classFile)) {
+                    throw new IOException("classFile.delete() failed");
+                }
+                if (!ctxt.rename(tmpFile, classFile)) {
+                    if (log.isInfoEnabled()) {
+                        log.info("Failed to rename tmp class file "
+                                + tmpFile + " (which " + existence(ctxt, tmpFile) + ") to "
+                                + classFile + " (which " + existence(ctxt, classFile) + ")");
+                    }
+                    throw new IOException("tmpFile.renameTo(classFile) failed (" + tmpFile + " -> " + classFile + ")");
+                }
+            } finally {
+                DIAGNOSTICS.remove(classFile, ourTrace);
             }
         }
 
