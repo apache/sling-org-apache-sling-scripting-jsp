@@ -30,12 +30,15 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.servlet.jsp.tagext.TagInfo;
 
+import org.apache.juli.logging.Log;
+import org.apache.juli.logging.LogFactory;
 import org.apache.sling.commons.compiler.source.JavaEscapeHelper;
 import org.apache.sling.scripting.jsp.jasper.compiler.Compiler;
 import org.apache.sling.scripting.jsp.jasper.compiler.JDTCompiler;
 import org.apache.sling.scripting.jsp.jasper.compiler.JspRuntimeContext;
 import org.apache.sling.scripting.jsp.jasper.compiler.Localizer;
 import org.apache.sling.scripting.jsp.jasper.compiler.ServletWriter;
+import org.apache.sling.scripting.jsp.jasper.servlet.JspServletWrapper;
 
 /**
  * A place holder for various things that are used through out the JSP
@@ -53,11 +56,11 @@ import org.apache.sling.scripting.jsp.jasper.compiler.ServletWriter;
  */
 public class JspCompilationContext {
 
-    private final org.apache.juli.logging.Log LOG =
-            org.apache.juli.logging.LogFactory.getLog(Compiler.class);
+    private final Log LOG = LogFactory.getLog(Compiler.class);
 
     private final Map<String, URL> tagFileJarUrls;
 
+    private final JspServletWrapper jspServletWrapper;
     private volatile String className;
     private final String jspUri;
     private volatile boolean isErrPage;
@@ -82,23 +85,23 @@ public class JspCompilationContext {
     private volatile TagInfo tagInfo;
     private volatile URL tagFileJarUrl;
 
-    public JspCompilationContext(String jspUri,
+    public JspCompilationContext(JspServletWrapper jspServletWrapper,
                                  boolean isErrPage,
                                  Options options,
                                  ServletContext context,
                                  JspRuntimeContext rctxt) {
-        this(jspUri, isErrPage, options, context, rctxt, Constants.JSP_PACKAGE_NAME);
+        this(jspServletWrapper, isErrPage, options, context, rctxt, Constants.JSP_PACKAGE_NAME);
     }
 
     // jspURI _must_ be relative to the context
-    public JspCompilationContext(String jspUri,
-                                 boolean isErrPage,
-                                 Options options,
-                                 ServletContext context,
-                                 JspRuntimeContext rctxt,
-                                 String basePckName) {
-
-        this.jspUri = canonicalURI(jspUri);
+    public JspCompilationContext(JspServletWrapper jspServletWrapper,
+                                  boolean isErrPage,
+                                  Options options,
+                                  ServletContext context,
+                                  JspRuntimeContext rctxt,
+                                  String basePckName) {
+        this.jspServletWrapper = jspServletWrapper;
+        this.jspUri = canonicalURI(jspServletWrapper.getJspUri());
         this.isErrPage = isErrPage;
         this.options = options;
         this.context = context;
@@ -121,13 +124,13 @@ public class JspCompilationContext {
         this.basePackageName = basePckName;
     }
 
-    public JspCompilationContext(String tagfile,
+    public JspCompilationContext(JspServletWrapper jspServletWrapper,
                                  TagInfo tagInfo,
                                  Options options,
                                  ServletContext context,
                                  JspRuntimeContext rctxt,
                                  URL tagFileJarUrl) {
-        this(tagfile, false, options, context, rctxt);
+        this(jspServletWrapper, false, options, context, rctxt);
         this.isTagFile = true;
         this.tagInfo = tagInfo;
         this.tagFileJarUrl = tagFileJarUrl;
@@ -246,7 +249,7 @@ public class JspCompilationContext {
      * @return a null if the resource cannot be found or represented
      *         as an InputStream.
      */
-    public java.io.InputStream getResourceAsStream(String res) {
+    public InputStream getResourceAsStream(String res) {
         return context.getResourceAsStream(canonicalURI(res));
     }
 
@@ -649,5 +652,8 @@ public class JspCompilationContext {
        return result.toString();
     }
 
+    public JspServletWrapper getJspServletWrapper() {
+        return jspServletWrapper;
+    }
 }
 

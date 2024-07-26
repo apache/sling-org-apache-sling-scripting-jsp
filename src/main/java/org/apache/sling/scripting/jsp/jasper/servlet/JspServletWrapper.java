@@ -106,7 +106,7 @@ public class JspServletWrapper {
         this.config = config;
         this.options = options;
         this.jspUri = jspUri;
-        this.ctxt = new JspCompilationContext(jspUri, isErrorPage, options,
+        this.ctxt = new JspCompilationContext(this, isErrorPage, options,
 					 config.getServletContext(),
 					 rctxt);
         if ( log.isDebugEnabled() ) {
@@ -127,7 +127,7 @@ public class JspServletWrapper {
         this.config = config;
         this.options = options;
         this.jspUri = jspUri;
-        this.ctxt = new JspCompilationContext(jspUri, isErrorPage, options,
+        this.ctxt = new JspCompilationContext(this, isErrorPage, options,
                              config.getServletContext(),
                              rctxt, null);
         this.theServlet = servlet;
@@ -150,7 +150,7 @@ public class JspServletWrapper {
         this.config = null;	// not used
         this.options = options;
         this.jspUri = tagFilePath;
-        this.ctxt = new JspCompilationContext(jspUri, tagInfo, options,
+        this.ctxt = new JspCompilationContext(this, tagInfo, options,
 					 servletContext, rctxt, tagFileJarUrl);
         if ( log.isDebugEnabled() ) {
             log.debug("Creating new wrapper for tagfile " + jspUri);
@@ -418,7 +418,7 @@ public class JspServletWrapper {
                     continue;
                 }
                 final long includeLastModified = ctxt.getRuntimeContext().getIOProvider().lastModified(include);
-                log.info("Last modified date for include " + include + " is " + Instant.ofEpochMilli(includeLastModified));
+                log.info("Last modified date for include " + include + " (of " + targetFile + ") is " + Instant.ofEpochMilli(includeLastModified));
 
                 if (includeLastModified > targetLastModified) {
                     if (log.isDebugEnabled()) {
@@ -464,7 +464,7 @@ public class JspServletWrapper {
      * @throws SlingPageException JSP page exception handler exceptions
      * @throws SlingException for any non runtime exception
      * @throws RuntimeException for runtime exceptions
-     * 
+     *
      */
     public void service(final SlingBindings bindings) {
         try {
@@ -611,7 +611,7 @@ public class JspServletWrapper {
             return (RuntimeException) e;
         }
         // wrap in ScriptEvaluationException
-        return new ScriptEvaluationException(this.ctxt.getJspFile(), 
+        return new ScriptEvaluationException(this.ctxt.getJspFile(),
             e.getMessage() == null ? e.toString() : e.getMessage(), e);
     }
 
@@ -652,7 +652,7 @@ public class JspServletWrapper {
                         null,
                         javaLineNumber,
                         ctxt);
-    
+
                 // If the line number is less than one we couldn't find out
                 // where in the JSP things went wrong
                 final int jspLineNumber = detail.getJspBeginLineNumber();
@@ -662,13 +662,13 @@ public class JspServletWrapper {
                     if (options.getDisplaySourceFragment() && detail.getJspExtract() != null ) {
                         message = Localizer.getMessage("jsp.exception", detail.getJspFileName(), String.valueOf(jspLineNumber))
                                 .concat(" : ").concat(origMsg).concat("\n\n").concat(detail.getJspExtract()).concat("\n");
-        
+
                     } else {
                         message = Localizer.getMessage("jsp.exception", detail.getJspFileName(), String.valueOf(jspLineNumber))
                                 .concat(" : ").concat(origMsg);
-                    }    
-                    result = new SlingException(message, ex);    
-                }    
+                    }
+                    result = new SlingException(message, ex);
+                }
             }
         } catch (final Exception je) {
             // If anything goes wrong, just revert to the original behaviour

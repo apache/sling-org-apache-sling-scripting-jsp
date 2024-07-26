@@ -33,6 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.sling.scripting.jsp.jasper.JasperException;
 import org.apache.sling.scripting.jsp.jasper.JspCompilationContext;
+import org.apache.sling.scripting.jsp.jasper.servlet.JspServletWrapper;
 
 /**
  * Contains static utilities for generating SMAP data based on the
@@ -245,6 +246,20 @@ public class SmapUtil {
         private static final ConcurrentHashMap<String, Exception> DIAGNOSTICS = new ConcurrentHashMap<>();
 
         static void install(JspCompilationContext ctxt, String classFile, byte[] smap) throws IOException {
+            JspServletWrapper activeWrapper = ctxt.getJspServletWrapper();
+            JspServletWrapper currentWrapper = ctxt.getRuntimeContext().getWrapper(ctxt.getJspFile());
+            if (activeWrapper != currentWrapper) {
+                String originalHex = Integer.toHexString(activeWrapper.hashCode());
+                String currentHex = Integer.toHexString(currentWrapper.hashCode());
+                log.warn("SmapUtil#install() called for " + activeWrapper.getJspUri() +
+                        " with JspServletWrapper@" + originalHex +
+                        ", which is different from the current JspServletWrapper@" + currentHex + ".");
+            } else {
+                String originalHex = Integer.toHexString(activeWrapper.hashCode());
+                log.info("SmapUtil#install() called for " + activeWrapper.getJspUri() +
+                        " with the current JspServletWrapper@" + originalHex);
+            }
+
             Exception ourTrace = new Exception("diagnostic stack trace from thread " + Thread.currentThread().getName());
             Exception otherTrace = DIAGNOSTICS.put(classFile, ourTrace);
             try {
