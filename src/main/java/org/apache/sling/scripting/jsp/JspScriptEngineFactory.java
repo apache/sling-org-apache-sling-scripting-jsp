@@ -37,6 +37,7 @@ import org.apache.sling.api.resource.observation.ExternalResourceChangeListener;
 import org.apache.sling.api.resource.observation.ResourceChange;
 import org.apache.sling.api.resource.observation.ResourceChange.ChangeType;
 import org.apache.sling.api.resource.observation.ResourceChangeListener;
+import org.apache.sling.api.resource.path.Path;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.apache.sling.commons.classloader.ClassLoaderWriter;
@@ -658,8 +659,11 @@ public class JspScriptEngineFactory
 	@Override
 	public void onClassLoaderClear(String context) {
         final JspRuntimeContext rctxt = this.jspRuntimeContext;
-		if ( rctxt != null ) {
-            renewJspRuntimeContext();
+        if (rctxt != null && context != null) {
+            Path path = new Path(context);
+            if (path.matches("/org/apache/jsp")) {
+                renewJspRuntimeContext();
+            }
         }
 	}
 }
