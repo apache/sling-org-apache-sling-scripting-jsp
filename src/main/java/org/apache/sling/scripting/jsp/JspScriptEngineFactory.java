@@ -656,8 +656,8 @@ public class JspScriptEngineFactory
         t.start();
     }
 
-	@Override
-	public void onClassLoaderClear(String context) {
+    @Override
+    public void onClassLoaderClear(String context) {
         final JspRuntimeContext rctxt = this.jspRuntimeContext;
         if (rctxt != null && context != null) {
             Path path = new Path(context);
@@ -665,5 +665,5 @@ public class JspScriptEngineFactory
                 renewJspRuntimeContext();
             }
         }
-	}
+    }
 }
