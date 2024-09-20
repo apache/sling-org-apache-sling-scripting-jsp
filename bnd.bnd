@@ -2,3 +2,6 @@ ScriptEngine-Name:${project.name}
 ScriptEngine-Version:${project.version}
 Import-Package: *
 -conditionalpackage: org.apache.el.*
+# note: -fixupmessage also overwrites the directive inherited from the parent
+-fixupmessages: "Export org.apache.sling.scripting.jsp.jasper.runtime,  has 2,  private references"; \
+    is:=ignore
