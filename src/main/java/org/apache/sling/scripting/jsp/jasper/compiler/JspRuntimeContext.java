@@ -1,21 +1,31 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
 package org.apache.sling.scripting.jsp.jasper.compiler;
+
+import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.jsp.JspApplicationContext;
+import javax.servlet.jsp.JspEngineInfo;
+import javax.servlet.jsp.JspFactory;
+import javax.servlet.jsp.PageContext;
 
 import java.io.File;
 import java.io.FilePermission;
@@ -33,15 +43,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.jsp.JspApplicationContext;
-import javax.servlet.jsp.JspEngineInfo;
-import javax.servlet.jsp.JspFactory;
-import javax.servlet.jsp.PageContext;
 
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
@@ -88,28 +89,39 @@ public final class JspRuntimeContext {
         private final JspFactory own;
 
         public JspFactoryHandler(final JspFactory orig, final JspFactory own) {
-            this.original = (orig instanceof JspFactoryHandler ? ((JspFactoryHandler)orig).original : orig);
+            this.original = (orig instanceof JspFactoryHandler ? ((JspFactoryHandler) orig).original : orig);
             this.own = own;
         }
 
         private JspFactory getFactory() {
             final Integer useOwnFactory = USE_OWN_FACTORY.get();
-            if ( useOwnFactory == null || useOwnFactory.intValue() == 0 ) {
+            if (useOwnFactory == null || useOwnFactory.intValue() == 0) {
                 return this.original;
             }
             return this.own;
         }
 
         @Override
-        public PageContext getPageContext(Servlet paramServlet,
+        public PageContext getPageContext(
+                Servlet paramServlet,
                 ServletRequest paramServletRequest,
-                ServletResponse paramServletResponse, String paramString,
-                boolean paramBoolean1, int paramInt, boolean paramBoolean2) {
-            PageContext context = this.getFactory().getPageContext(paramServlet, paramServletRequest,
-                    paramServletResponse, paramString, paramBoolean1,
-                    paramInt, paramBoolean2);
+                ServletResponse paramServletResponse,
+                String paramString,
+                boolean paramBoolean1,
+                int paramInt,
+                boolean paramBoolean2) {
+            PageContext context = this.getFactory()
+                    .getPageContext(
+                            paramServlet,
+                            paramServletRequest,
+                            paramServletResponse,
+                            paramString,
+                            paramBoolean1,
+                            paramInt,
+                            paramBoolean2);
             if (paramServletRequest instanceof SlingHttpServletRequest) {
-                SlingBindings slingBindings = (SlingBindings) paramServletRequest.getAttribute(SlingBindings.class.getName());
+                SlingBindings slingBindings =
+                        (SlingBindings) paramServletRequest.getAttribute(SlingBindings.class.getName());
                 if (slingBindings != null) {
                     context = new SlingJspPageContext(context, slingBindings);
                 }
@@ -128,8 +140,7 @@ public final class JspRuntimeContext {
         }
 
         @Override
-        public JspApplicationContext getJspApplicationContext(
-                ServletContext paramServletContext) {
+        public JspApplicationContext getJspApplicationContext(ServletContext paramServletContext) {
             return this.getFactory().getJspApplicationContext(paramServletContext);
         }
 
@@ -138,7 +149,7 @@ public final class JspRuntimeContext {
          */
         public void destroy() {
             final JspFactory current = JspFactory.getDefaultFactory();
-            if ( current == this ) {
+            if (current == this) {
                 JspFactory.setDefaultFactory(this.original);
             }
         }
@@ -146,7 +157,7 @@ public final class JspRuntimeContext {
         public void incUsage() {
             final Integer count = JspRuntimeContext.USE_OWN_FACTORY.get();
             int newCount = 1;
-            if ( count != null ) {
+            if (count != null) {
                 newCount = count + 1;
             }
             JspRuntimeContext.USE_OWN_FACTORY.set(newCount);
@@ -176,21 +187,21 @@ public final class JspRuntimeContext {
     public static JspFactoryHandler initFactoryHandler() {
         JspFactoryImpl factory = new JspFactoryImpl();
         SecurityClassLoad.securityClassLoad(factory.getClass().getClassLoader());
-        if( System.getSecurityManager() != null ) {
+        if (System.getSecurityManager() != null) {
             String basePackage = "org.apache.sling.scripting.jsp.jasper.";
             try {
-                factory.getClass().getClassLoader().loadClass( basePackage +
-                                                               "runtime.JspFactoryImpl$PrivilegedGetPageContext");
-                factory.getClass().getClassLoader().loadClass( basePackage +
-                                                               "runtime.JspFactoryImpl$PrivilegedReleasePageContext");
-                factory.getClass().getClassLoader().loadClass( basePackage +
-                                                               "runtime.JspRuntimeLibrary");
-                factory.getClass().getClassLoader().loadClass( basePackage +
-                                                               "runtime.JspRuntimeLibrary$PrivilegedIntrospectHelper");
-                factory.getClass().getClassLoader().loadClass( basePackage +
-                                                               "runtime.ServletResponseWrapperInclude");
-                factory.getClass().getClassLoader().loadClass( basePackage +
-                                                               "servlet.JspServletWrapper");
+                factory.getClass()
+                        .getClassLoader()
+                        .loadClass(basePackage + "runtime.JspFactoryImpl$PrivilegedGetPageContext");
+                factory.getClass()
+                        .getClassLoader()
+                        .loadClass(basePackage + "runtime.JspFactoryImpl$PrivilegedReleasePageContext");
+                factory.getClass().getClassLoader().loadClass(basePackage + "runtime.JspRuntimeLibrary");
+                factory.getClass()
+                        .getClassLoader()
+                        .loadClass(basePackage + "runtime.JspRuntimeLibrary$PrivilegedIntrospectHelper");
+                factory.getClass().getClassLoader().loadClass(basePackage + "runtime.ServletResponseWrapperInclude");
+                factory.getClass().getClassLoader().loadClass(basePackage + "servlet.JspServletWrapper");
             } catch (ClassNotFoundException ex) {
                 throw new IllegalStateException(ex);
             }
@@ -229,13 +240,15 @@ public final class JspRuntimeContext {
      * This web applications ServletContext
      */
     private ServletContext context;
+
     private Options options;
     private PermissionCollection permissionCollection;
 
     /**
      * Maps JSP pages to their JspServletWrapper's
      */
-    private final ConcurrentHashMap<String, JspServletWrapper> jsps = new ConcurrentHashMap<String, JspServletWrapper>();
+    private final ConcurrentHashMap<String, JspServletWrapper> jsps =
+            new ConcurrentHashMap<String, JspServletWrapper>();
 
     /**
      * Maps dependencies to the using jsp.
@@ -250,12 +263,12 @@ public final class JspRuntimeContext {
     // ------------------------------------------------------ Public Methods
 
     public void addJspDependencies(final JspServletWrapper jsw, final List<String> deps) {
-        if ( deps != null ) {
+        if (deps != null) {
             final String jspUri = jsw.getJspUri();
-            synchronized ( depToJsp ) {
-                for(final String dep : deps) {
+            synchronized (depToJsp) {
+                for (final String dep : deps) {
                     Set<String> set = depToJsp.get(dep);
-                    if ( set == null ) {
+                    if (set == null) {
                         set = new HashSet<String>();
                         depToJsp.put(dep, set);
                     }
@@ -269,18 +282,19 @@ public final class JspRuntimeContext {
      * Handle jsp modifications
      */
     public boolean handleModification(final String scriptName, final boolean isRemove) {
-        if ( log.isDebugEnabled() ) {
+        if (log.isDebugEnabled()) {
             log.debug("Handling modification " + scriptName);
         }
 
         final JspServletWrapper wrapper = jsps.remove(scriptName);
-        if ( wrapper == null && isRemove ) {
+        if (wrapper == null && isRemove) {
             boolean removed = false;
             final Path path = new Path(scriptName);
-            final Iterator<Map.Entry<String, JspServletWrapper>> iter = jsps.entrySet().iterator();
-            while ( iter.hasNext() ) {
+            final Iterator<Map.Entry<String, JspServletWrapper>> iter =
+                    jsps.entrySet().iterator();
+            while (iter.hasNext()) {
                 final Map.Entry<String, JspServletWrapper> entry = iter.next();
-                if ( path.matches(entry.getKey()) ) {
+                if (path.matches(entry.getKey())) {
                     iter.remove();
                     removed |= handleModification(entry.getKey(), entry.getValue());
                 }
@@ -302,11 +316,11 @@ public final class JspRuntimeContext {
         boolean removed = this.invalidate(wrapper);
 
         final Set<String> deps;
-        synchronized ( depToJsp ) {
+        synchronized (depToJsp) {
             deps = depToJsp.remove(scriptName);
         }
-        if ( deps != null ) {
-            for(final String dep : deps) {
+        if (deps != null) {
+            for (final String dep : deps) {
                 removed |= this.invalidate(jsps.remove(dep));
             }
         }
@@ -317,8 +331,8 @@ public final class JspRuntimeContext {
      * Invalidate a wrapper and destroy it.
      */
     private boolean invalidate(final JspServletWrapper wrapper) {
-        if ( wrapper != null ) {
-            if ( log.isDebugEnabled() ) {
+        if (wrapper != null) {
+            if (log.isDebugEnabled()) {
                 log.debug("Invalidating jsp " + wrapper.getJspUri());
             }
             wrapper.destroy(true);
@@ -335,7 +349,7 @@ public final class JspRuntimeContext {
      */
     public JspServletWrapper addWrapper(final String jspUri, final JspServletWrapper jsw) {
         final JspServletWrapper previous = jsps.putIfAbsent(jspUri, jsw);
-        if ( previous == null ) {
+        if (previous == null) {
             addJspDependencies(jsw, jsw.getDependants());
             return jsw;
         }
@@ -379,7 +393,7 @@ public final class JspRuntimeContext {
             servlets.next().destroy(false);
         }
         jsps.clear();
-        synchronized ( depToJsp ) {
+        synchronized (depToJsp) {
             depToJsp.clear();
         }
     }
@@ -403,51 +417,46 @@ public final class JspRuntimeContext {
         // web app context directory, then add a file read permission
         // for that directory.
         Policy policy = Policy.getPolicy();
-        if( policy != null ) {
+        if (policy != null) {
             try {
                 // Get the permissions for the web app context
                 String docBase = context.getRealPath("/");
-                if( docBase == null ) {
+                if (docBase == null) {
                     docBase = options.getScratchDir().toString();
                 }
                 String codeBase = docBase;
-                if (!codeBase.endsWith(File.separator)){
+                if (!codeBase.endsWith(File.separator)) {
                     codeBase = codeBase + File.separator;
                 }
                 File contextDir = new File(codeBase);
                 URL url = contextDir.getCanonicalFile().toURL();
-                final CodeSource codeSource = new CodeSource(url,(Certificate[])null);
+                final CodeSource codeSource = new CodeSource(url, (Certificate[]) null);
                 permissionCollection = policy.getPermissions(codeSource);
 
                 // Create a file read permission for web app context directory
-                if (!docBase.endsWith(File.separator)){
-                    permissionCollection.add
-                        (new FilePermission(docBase,"read"));
+                if (!docBase.endsWith(File.separator)) {
+                    permissionCollection.add(new FilePermission(docBase, "read"));
                     docBase = docBase + File.separator;
                 } else {
-                    permissionCollection.add
-                        (new FilePermission
-                            (docBase.substring(0,docBase.length() - 1),"read"));
+                    permissionCollection.add(new FilePermission(docBase.substring(0, docBase.length() - 1), "read"));
                 }
                 docBase = docBase + "-";
-                permissionCollection.add(new FilePermission(docBase,"read"));
+                permissionCollection.add(new FilePermission(docBase, "read"));
 
                 // Create a file read permission for web app tempdir (work)
                 // directory
                 String workDir = options.getScratchDir().toString();
-                if (!workDir.endsWith(File.separator)){
-                    permissionCollection.add
-                        (new FilePermission(workDir,"read"));
+                if (!workDir.endsWith(File.separator)) {
+                    permissionCollection.add(new FilePermission(workDir, "read"));
                     workDir = workDir + File.separator;
                 }
                 workDir = workDir + "-";
-                permissionCollection.add(new FilePermission(workDir,"read"));
+                permissionCollection.add(new FilePermission(workDir, "read"));
 
                 // Allow the JSP to access org.apache.sling.scripting.jsp.jasper.runtime.HttpJspBase
-                permissionCollection.add( new RuntimePermission(
-                    "accessClassInPackage.org.apache.jasper.runtime") );
+                permissionCollection.add(new RuntimePermission("accessClassInPackage.org.apache.jasper.runtime"));
             } catch (final Exception e) {
-                context.log("Security Init for context failed",e);
+                context.log("Security Init for context failed", e);
             }
         }
     }
@@ -467,5 +476,4 @@ public final class JspRuntimeContext {
 
         return lock;
     }
-
 }

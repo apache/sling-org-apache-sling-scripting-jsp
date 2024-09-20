@@ -1,18 +1,20 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.sling.scripting.jsp;
 
@@ -81,9 +83,8 @@ class SlingIOProvider implements IOProvider {
      * ResourceProvider and retrieved from the Resource if the StreamProvider
      * interface is implemented.
      */
-    public InputStream getInputStream(final String path)
-            throws FileNotFoundException, IOException {
-        if ( path.startsWith(":") ) {
+    public InputStream getInputStream(final String path) throws FileNotFoundException, IOException {
+        if (path.startsWith(":")) {
             return this.classLoaderWriter.getInputStream(path.substring(1));
         }
         ResourceResolver resolver = requestResourceResolver.get();
@@ -97,8 +98,7 @@ class SlingIOProvider implements IOProvider {
                     }
                 }
             } catch (final SlingException se) {
-                throw (IOException) new IOException(
-                    "Failed to get InputStream for " + path).initCause(se);
+                throw (IOException) new IOException("Failed to get InputStream for " + path).initCause(se);
             }
         }
         throw new FileNotFoundException("Cannot find " + path);
@@ -111,7 +111,7 @@ class SlingIOProvider implements IOProvider {
      * returned.
      */
     public long lastModified(final String path) {
-        if ( path.startsWith(":") ) {
+        if (path.startsWith(":")) {
             return this.classLoaderWriter.getLastModified(path.substring(1));
         }
         ResourceResolver resolver = requestResourceResolver.get();
@@ -169,7 +169,6 @@ class SlingIOProvider implements IOProvider {
 
     // ---------- Helper Methods for JspServletContext -------------------------
 
-
     URL getURL(final String path) throws MalformedURLException {
         ResourceResolver resolver = requestResourceResolver.get();
         if (resolver != null) {
@@ -177,8 +176,7 @@ class SlingIOProvider implements IOProvider {
                 final Resource resource = resolver.getResource(cleanPath(path, true));
                 return (resource != null) ? resource.adaptTo(URL.class) : null;
             } catch (final SlingException se) {
-                throw (MalformedURLException) new MalformedURLException(
-                    "Cannot get URL for " + path).initCause(se);
+                throw (MalformedURLException) new MalformedURLException("Cannot get URL for " + path).initCause(se);
             }
         }
         return null;
@@ -193,7 +191,8 @@ class SlingIOProvider implements IOProvider {
                 final String cleanedPath = cleanPath(path, false);
                 final boolean startsWithWebInfTags = cleanedPath.startsWith(WEB_INF_TAGS);
 
-                Resource resource = resolver.getResource(startsWithWebInfTags ? cleanedPath.substring(WEB_INF_TAGS.length()) : cleanedPath);
+                Resource resource = resolver.getResource(
+                        startsWithWebInfTags ? cleanedPath.substring(WEB_INF_TAGS.length()) : cleanedPath);
                 if (resource != null) {
                     Iterator<Resource> entries = resolver.listChildren(resource);
                     while (entries.hasNext()) {
@@ -206,8 +205,7 @@ class SlingIOProvider implements IOProvider {
                     }
                 }
             } catch (final SlingException se) {
-                log.warn("getResourcePaths: Cannot list children of " + path,
-                    se);
+                log.warn("getResourcePaths: Cannot list children of " + path, se);
             }
         }
 

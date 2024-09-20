@@ -1,20 +1,21 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
 package org.apache.sling.scripting.jsp.jasper.compiler;
 
 import java.io.ByteArrayOutputStream;
@@ -43,15 +44,14 @@ import org.apache.sling.scripting.jsp.jasper.JspCompilationContext;
  */
 public class SmapUtil {
 
-    private org.apache.juli.logging.Log log=
-            org.apache.juli.logging.LogFactory.getLog( SmapUtil.class );
+    private org.apache.juli.logging.Log log = org.apache.juli.logging.LogFactory.getLog(SmapUtil.class);
 
-    //*********************************************************************
+    // *********************************************************************
     // Constants
 
     public static final String SMAP_ENCODING = "UTF-8";
 
-    //*********************************************************************
+    // *********************************************************************
     // Public entry points
 
     /**
@@ -62,10 +62,7 @@ public class SmapUtil {
      * @param pageNodes The current JSP page
      * @return a SMAP for the page
      */
-    public static String[] generateSmap(
-            JspCompilationContext ctxt,
-            Node.Nodes pageNodes)
-                    throws IOException {
+    public static String[] generateSmap(JspCompilationContext ctxt, Node.Nodes pageNodes) throws IOException {
 
         // Scan the nodes for presence of Jasper generated inner classes
         PreScanVisitor psVisitor = new PreScanVisitor();
@@ -79,19 +76,19 @@ public class SmapUtil {
         SmapGenerator g = new SmapGenerator();
 
         /** Disable reading of input SMAP because:
-            1. There is a bug here: getRealPath() is null if .jsp is in a jar
-        	Bugzilla 14660.
-            2. Mappings from other sources into .jsp files are not supported.
-            TODO: fix 1. if 2. is not true.
-        // determine if we have an input SMAP
-        String smapPath = inputSmapPath(ctxt.getRealPath(ctxt.getJspFile()));
-            File inputSmap = new File(smapPath);
-            if (inputSmap.exists()) {
-                byte[] embeddedSmap = null;
-            byte[] subSmap = SDEInstaller.readWhole(inputSmap);
-            String subSmapString = new String(subSmap, SMAP_ENCODING);
-            g.addSmap(subSmapString, "JSP");
-        }
+         * 1. There is a bug here: getRealPath() is null if .jsp is in a jar
+         * Bugzilla 14660.
+         * 2. Mappings from other sources into .jsp files are not supported.
+         * TODO: fix 1. if 2. is not true.
+         * // determine if we have an input SMAP
+         * String smapPath = inputSmapPath(ctxt.getRealPath(ctxt.getJspFile()));
+         * File inputSmap = new File(smapPath);
+         * if (inputSmap.exists()) {
+         * byte[] embeddedSmap = null;
+         * byte[] subSmap = SDEInstaller.readWhole(inputSmap);
+         * String subSmapString = new String(subSmap, SMAP_ENCODING);
+         * g.addSmap(subSmapString, "JSP");
+         * }
          **/
 
         // now, assemble info about our own stratum (JSP) using JspLineMap
@@ -108,7 +105,7 @@ public class SmapUtil {
 
         String classFileName = ctxt.getClassFileName();
         int innerClassCount = map.size();
-        String [] smapInfo = new String[2 + innerClassCount*2];
+        String[] smapInfo = new String[2 + innerClassCount * 2];
         smapInfo[0] = classFileName;
         smapInfo[1] = g.getString();
 
@@ -124,11 +121,10 @@ public class SmapUtil {
             g.addStratum(s, true);
 
             String innerClassFileName =
-                    classFileName.substring(0, classFileName.indexOf(".class")) +
-                    '$' + innerClass + ".class";
+                    classFileName.substring(0, classFileName.indexOf(".class")) + '$' + innerClass + ".class";
             dumpSmap(g, innerClassFileName, ctxt);
             smapInfo[count] = innerClassFileName;
-            smapInfo[count+1] = g.getString();
+            smapInfo[count + 1] = g.getString();
             count += 2;
         }
 
@@ -140,8 +136,7 @@ public class SmapUtil {
             OutputStream out = null;
             try {
                 out = ctxt.getOutputStream(smapFile + ".smap");
-                PrintWriter so = new PrintWriter(new OutputStreamWriter(out,
-                        SMAP_ENCODING));
+                PrintWriter so = new PrintWriter(new OutputStreamWriter(out, SMAP_ENCODING));
                 so.print(g.getString());
                 so.close();
                 out = null;
@@ -156,19 +151,18 @@ public class SmapUtil {
         }
     }
 
-    public static void installSmap(JspCompilationContext ctxt, String[] smap)
-            throws IOException {
+    public static void installSmap(JspCompilationContext ctxt, String[] smap) throws IOException {
         if (smap == null) {
             return;
         }
 
         for (int i = 0; i < smap.length; i += 2) {
             String outServlet = smap[i];
-            SDEInstaller.install(ctxt, outServlet, smap[i+1].getBytes());
+            SDEInstaller.install(ctxt, outServlet, smap[i + 1].getBytes());
         }
     }
 
-    //*********************************************************************
+    // *********************************************************************
     // Private utilities
 
     /**
@@ -187,12 +181,11 @@ public class SmapUtil {
         return path.substring(0, path.lastIndexOf('.') + 1) + "smap";
     }
 
-    //*********************************************************************
+    // *********************************************************************
     // Installation logic (from Robert Field, JSR-045 spec lead)
     private static class SDEInstaller {
 
-        private org.apache.juli.logging.Log log=
-                org.apache.juli.logging.LogFactory.getLog( SDEInstaller.class );
+        private org.apache.juli.logging.Log log = org.apache.juli.logging.LogFactory.getLog(SDEInstaller.class);
 
         static final String nameSDE = "SourceDebugExtension";
 
@@ -300,8 +293,7 @@ public class SmapUtil {
             copy(4 + 2 + 2); // magic min/maj version
             int constantPoolCountPos = genPos;
             int constantPoolCount = readU2();
-            if (log.isDebugEnabled())
-                log.debug("constant pool count: " + constantPoolCount);
+            if (log.isDebugEnabled()) log.debug("constant pool count: " + constantPoolCount);
             writeU2(constantPoolCount);
 
             // copy old constant pool return index of SDE symbol, if found
@@ -315,32 +307,27 @@ public class SmapUtil {
                 ++constantPoolCount;
                 randomAccessWriteU2(constantPoolCountPos, constantPoolCount);
 
-                if (log.isDebugEnabled())
-                    log.debug("SourceDebugExtension not found, installed at: " + sdeIndex);
+                if (log.isDebugEnabled()) log.debug("SourceDebugExtension not found, installed at: " + sdeIndex);
             } else {
-                if (log.isDebugEnabled())
-                    log.debug("SourceDebugExtension found at: " + sdeIndex);
+                if (log.isDebugEnabled()) log.debug("SourceDebugExtension found at: " + sdeIndex);
             }
             copy(2 + 2 + 2); // access, this, super
             int interfaceCount = readU2();
             writeU2(interfaceCount);
-            if (log.isDebugEnabled())
-                log.debug("interfaceCount: " + interfaceCount);
+            if (log.isDebugEnabled()) log.debug("interfaceCount: " + interfaceCount);
             copy(interfaceCount * 2);
             copyMembers(); // fields
             copyMembers(); // methods
             int attrCountPos = genPos;
             int attrCount = readU2();
             writeU2(attrCount);
-            if (log.isDebugEnabled())
-                log.debug("class attrCount: " + attrCount);
+            if (log.isDebugEnabled()) log.debug("class attrCount: " + attrCount);
             // copy the class attributes, return true if SDE attr found (not copied)
             if (!copyAttrs(attrCount)) {
                 // we will be adding SDE and it isn't already counted
                 ++attrCount;
                 randomAccessWriteU2(attrCountPos, attrCount);
-                if (log.isDebugEnabled())
-                    log.debug("class attrCount incremented");
+                if (log.isDebugEnabled()) log.debug("class attrCount incremented");
             }
             writeAttrForSDE(sdeIndex);
         }
@@ -348,14 +335,12 @@ public class SmapUtil {
         void copyMembers() {
             int count = readU2();
             writeU2(count);
-            if (log.isDebugEnabled())
-                log.debug("members count: " + count);
+            if (log.isDebugEnabled()) log.debug("members count: " + count);
             for (int i = 0; i < count; ++i) {
                 copy(6); // access, name, descriptor
                 int attrCount = readU2();
                 writeU2(attrCount);
-                if (log.isDebugEnabled())
-                    log.debug("member attr count: " + attrCount);
+                if (log.isDebugEnabled()) log.debug("member attr count: " + attrCount);
                 copyAttrs(attrCount);
             }
         }
@@ -367,15 +352,13 @@ public class SmapUtil {
                 // don't write old SDE
                 if (nameIndex == sdeIndex) {
                     sdeFound = true;
-                    if (log.isDebugEnabled())
-                        log.debug("SDE attr found");
+                    if (log.isDebugEnabled()) log.debug("SDE attr found");
                 } else {
                     writeU2(nameIndex); // name
                     int len = readU4();
                     writeU4(len);
                     copy(len);
-                    if (log.isDebugEnabled())
-                        log.debug("attr len: " + len);
+                    if (log.isDebugEnabled()) log.debug("attr len: " + len);
                 }
             }
             return sdeFound;
@@ -411,7 +394,7 @@ public class SmapUtil {
         }
 
         void writeU1(int val) {
-            gen[genPos++] = (byte)val;
+            gen[genPos++] = (byte) val;
         }
 
         void writeU2(int val) {
@@ -444,58 +427,52 @@ public class SmapUtil {
             }
         }
 
-        int copyConstantPool(int constantPoolCount)
-                throws UnsupportedEncodingException, IOException {
+        int copyConstantPool(int constantPoolCount) throws UnsupportedEncodingException, IOException {
             int sdeIndex = -1;
             // copy const pool index zero not in class file
             for (int i = 1; i < constantPoolCount; ++i) {
                 int tag = readU1();
                 writeU1(tag);
                 switch (tag) {
-                case 7 : // Class
-                case 8 : // String
-                case 16 : // MethodType
-                    if (log.isDebugEnabled())
-                        log.debug(i + " copying 2 bytes");
-                    copy(2);
-                    break;
-                case 15 : // MethodHandle
-                    if (log.isDebugEnabled())
-                        log.debug(i + " copying 3 bytes");
-                    copy(3);
-                    break;
-                case 9 : // Field
-                case 10 : // Method
-                case 11 : // InterfaceMethod
-                case 3 : // Integer
-                case 4 : // Float
-                case 12 : // NameAndType
-                case 18 : // InvokeDynamic
-                    if (log.isDebugEnabled())
-                        log.debug(i + " copying 4 bytes");
-                    copy(4);
-                    break;
-                case 5 : // Long
-                case 6 : // Double
-                    if (log.isDebugEnabled())
-                        log.debug(i + " copying 8 bytes");
-                    copy(8);
-                    i++;
-                    break;
-                case 1 : // Utf8
-                    int len = readU2();
-                    writeU2(len);
-                    byte[] utf8 = readBytes(len);
-                    String str = new String(utf8, "UTF-8");
-                    if (log.isDebugEnabled())
-                        log.debug(i + " read class attr -- '" + str + "'");
-                    if (str.equals(nameSDE)) {
-                        sdeIndex = i;
-                    }
-                    writeBytes(utf8);
-                    break;
-                default :
-                    throw new IOException("unexpected tag: " + tag);
+                    case 7: // Class
+                    case 8: // String
+                    case 16: // MethodType
+                        if (log.isDebugEnabled()) log.debug(i + " copying 2 bytes");
+                        copy(2);
+                        break;
+                    case 15: // MethodHandle
+                        if (log.isDebugEnabled()) log.debug(i + " copying 3 bytes");
+                        copy(3);
+                        break;
+                    case 9: // Field
+                    case 10: // Method
+                    case 11: // InterfaceMethod
+                    case 3: // Integer
+                    case 4: // Float
+                    case 12: // NameAndType
+                    case 18: // InvokeDynamic
+                        if (log.isDebugEnabled()) log.debug(i + " copying 4 bytes");
+                        copy(4);
+                        break;
+                    case 5: // Long
+                    case 6: // Double
+                        if (log.isDebugEnabled()) log.debug(i + " copying 8 bytes");
+                        copy(8);
+                        i++;
+                        break;
+                    case 1: // Utf8
+                        int len = readU2();
+                        writeU2(len);
+                        byte[] utf8 = readBytes(len);
+                        String str = new String(utf8, "UTF-8");
+                        if (log.isDebugEnabled()) log.debug(i + " read class attr -- '" + str + "'");
+                        if (str.equals(nameSDE)) {
+                            sdeIndex = i;
+                        }
+                        writeBytes(utf8);
+                        break;
+                    default:
+                        throw new IOException("unexpected tag: " + tag);
                 }
             }
             return sdeIndex;
@@ -511,11 +488,7 @@ public class SmapUtil {
         }
     }
 
-    public static void evaluateNodes(
-            Node.Nodes nodes,
-            SmapStratum s,
-            HashMap innerClassMap,
-            boolean breakAtLF) {
+    public static void evaluateNodes(Node.Nodes nodes, SmapStratum s, HashMap innerClassMap, boolean breakAtLF) {
         try {
             nodes.visit(new SmapGenVisitor(s, breakAtLF, innerClassMap));
         } catch (JasperException ex) {
@@ -655,16 +628,15 @@ public class SmapUtil {
                 return;
             }
 
-            //Add the file information
+            // Add the file information
             String fileName = mark.getFile();
             smap.addFile(unqualify(fileName), fileName);
 
-            //Add a LineInfo that corresponds to the beginning of this node
+            // Add a LineInfo that corresponds to the beginning of this node
             int iInputStartLine = mark.getLineNumber();
             int iOutputStartLine = n.getBeginJavaLine();
-            int iOutputLineIncrement = breakAtLF? 1: 0;
-            smap.addLineData(iInputStartLine, fileName, 1, iOutputStartLine,
-                    iOutputLineIncrement);
+            int iOutputLineIncrement = breakAtLF ? 1 : 0;
+            smap.addLineData(iInputStartLine, fileName, 1, iOutputStartLine, iOutputLineIncrement);
 
             // Output additional mappings in the text
             java.util.ArrayList extraSmap = n.getExtraSmap();
@@ -673,7 +645,7 @@ public class SmapUtil {
                 for (int i = 0; i < extraSmap.size(); i++) {
                     iOutputStartLine += iOutputLineIncrement;
                     smap.addLineData(
-                            iInputStartLine+((Integer)extraSmap.get(i)).intValue(),
+                            iInputStartLine + ((Integer) extraSmap.get(i)).intValue(),
                             fileName,
                             1,
                             iOutputStartLine,
@@ -682,11 +654,7 @@ public class SmapUtil {
             }
         }
 
-        private void doSmap(
-                Node n,
-                int inLineCount,
-                int outIncrement,
-                int skippedLines) {
+        private void doSmap(Node n, int inLineCount, int outIncrement, int skippedLines) {
             Mark mark = n.getStart();
             if (mark == null) {
                 return;
@@ -765,5 +733,4 @@ public class SmapUtil {
             return map;
         }
     }
-
 }

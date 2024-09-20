@@ -1,28 +1,29 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
 package org.apache.sling.scripting.jsp.jasper.compiler;
 
+import javax.servlet.ServletContext;
+
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Iterator;
 import java.util.Vector;
-import java.net.URL;
-
-import javax.servlet.ServletContext;
 
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
@@ -38,7 +39,6 @@ import org.xml.sax.InputSource;
  * @author Kin-man Chung
  * @author Remy Maucherat
  */
-
 public class JspConfig {
 
     private static final String WEB_XML = "/WEB-INF/web.xml";
@@ -50,8 +50,8 @@ public class JspConfig {
     private ServletContext ctxt;
     private boolean initialized = false;
 
-    private String defaultIsXml = null;		// unspecified
-    private String defaultIsELIgnored = null;	// unspecified
+    private String defaultIsXml = null; // unspecified
+    private String defaultIsELIgnored = null; // unspecified
     private String defaultIsScriptingInvalid = null;
     private String defaultDeferedSyntaxAllowedAsLiteral = null;
     private String defaultTrimDirectiveWhitespaces = null;
@@ -85,13 +85,12 @@ public class JspConfig {
 
             is = uri.openStream();
             InputSource ip = new InputSource(is);
-            ip.setSystemId(uri.toExternalForm()); 
+            ip.setSystemId(uri.toExternalForm());
 
             ParserUtils pu = new ParserUtils();
             TreeNode webApp = pu.parseXMLDocument(WEB_XML, ip);
 
-            if (webApp == null
-                    || getVersion(webApp) < 2.4) {
+            if (webApp == null || getVersion(webApp) < 2.4) {
                 defaultIsELIgnored = "true";
                 return;
             }
@@ -122,24 +121,16 @@ public class JspConfig {
                     element = (TreeNode) list.next();
                     String tname = element.getName();
 
-                    if ("url-pattern".equals(tname))
-                        urlPatterns.addElement( element.getBody() );
-                    else if ("page-encoding".equals(tname))
-                        pageEncoding = element.getBody();
-                    else if ("is-xml".equals(tname))
-                        isXml = element.getBody();
-                    else if ("el-ignored".equals(tname))
-                        elIgnored = element.getBody();
-                    else if ("scripting-invalid".equals(tname))
-                        scriptingInvalid = element.getBody();
-                    else if ("include-prelude".equals(tname))
-                        includePrelude.addElement(element.getBody());
-                    else if ("include-coda".equals(tname))
-                        includeCoda.addElement(element.getBody());
+                    if ("url-pattern".equals(tname)) urlPatterns.addElement(element.getBody());
+                    else if ("page-encoding".equals(tname)) pageEncoding = element.getBody();
+                    else if ("is-xml".equals(tname)) isXml = element.getBody();
+                    else if ("el-ignored".equals(tname)) elIgnored = element.getBody();
+                    else if ("scripting-invalid".equals(tname)) scriptingInvalid = element.getBody();
+                    else if ("include-prelude".equals(tname)) includePrelude.addElement(element.getBody());
+                    else if ("include-coda".equals(tname)) includeCoda.addElement(element.getBody());
                     else if ("deferred-syntax-allowed-as-literal".equals(tname))
                         deferredSyntaxAllowedAsLiteral = element.getBody();
-                    else if ("trim-directive-whitespaces".equals(tname))
-                        trimDirectiveWhitespaces = element.getBody();
+                    else if ("trim-directive-whitespaces".equals(tname)) trimDirectiveWhitespaces = element.getBody();
                 }
 
                 if (urlPatterns.size() == 0) {
@@ -148,8 +139,8 @@ public class JspConfig {
 
                 // Add one JspPropertyGroup for each URL Pattern.  This makes
                 // the matching logic easier.
-                for( int p = 0; p < urlPatterns.size(); p++ ) {
-                    String urlPattern = (String)urlPatterns.elementAt( p );
+                for (int p = 0; p < urlPatterns.size(); p++) {
+                    String urlPattern = (String) urlPatterns.elementAt(p);
                     String path = null;
                     String extension = null;
 
@@ -160,8 +151,8 @@ public class JspConfig {
                         int i = urlPattern.lastIndexOf('/');
                         String file;
                         if (i >= 0) {
-                            path = urlPattern.substring(0,i+1);
-                            file = urlPattern.substring(i+1);
+                            path = urlPattern.substring(0, i + 1);
+                            file = urlPattern.substring(i + 1);
                         } else {
                             file = urlPattern;
                         }
@@ -170,7 +161,7 @@ public class JspConfig {
                         if (file.equals("*")) {
                             extension = "*";
                         } else if (file.startsWith("*.")) {
-                            extension = file.substring(file.indexOf('.')+1);
+                            extension = file.substring(file.indexOf('.') + 1);
                         }
 
                         // The url patterns are reconstructed as the follwoing:
@@ -178,18 +169,16 @@ public class JspConfig {
                         // path == null, extension != null:  *.ext
                         // path != null, extension == "*":   /foo/*
                         boolean isStar = "*".equals(extension);
-                        if ((path == null && (extension == null || isStar))
-                                || (path != null && !isStar)) {
+                        if ((path == null && (extension == null || isStar)) || (path != null && !isStar)) {
                             if (log.isWarnEnabled()) {
-                                log.warn(Localizer.getMessage(
-                                        "jsp.warning.bad.urlpattern.propertygroup",
-                                        urlPattern));
+                                log.warn(Localizer.getMessage("jsp.warning.bad.urlpattern.propertygroup", urlPattern));
                             }
                             continue;
                         }
                     }
 
-                    JspProperty property = new JspProperty(isXml,
+                    JspProperty property = new JspProperty(
+                            isXml,
                             elIgnored,
                             scriptingInvalid,
                             pageEncoding,
@@ -197,8 +186,7 @@ public class JspConfig {
                             includeCoda,
                             deferredSyntaxAllowedAsLiteral,
                             trimDirectiveWhitespaces);
-                    JspPropertyGroup propertyGroup =
-                        new JspPropertyGroup(path, extension, property);
+                    JspPropertyGroup propertyGroup = new JspPropertyGroup(path, extension, property);
 
                     jspProperties.addElement(propertyGroup);
                 }
@@ -209,7 +197,8 @@ public class JspConfig {
             if (is != null) {
                 try {
                     is.close();
-                } catch (Throwable t) {}
+                } catch (Throwable t) {
+                }
             }
         }
     }
@@ -218,10 +207,14 @@ public class JspConfig {
 
         if (!initialized) {
             processWebDotXml(ctxt);
-            defaultJspProperty = new JspProperty(defaultIsXml,
+            defaultJspProperty = new JspProperty(
+                    defaultIsXml,
                     defaultIsELIgnored,
                     defaultIsScriptingInvalid,
-                    null, null, null, defaultDeferedSyntaxAllowedAsLiteral, 
+                    null,
+                    null,
+                    null,
+                    defaultDeferedSyntaxAllowedAsLiteral,
                     defaultTrimDirectiveWhitespaces);
             initialized = true;
         }
@@ -231,8 +224,7 @@ public class JspConfig {
      * Select the property group that has more restrictive url-pattern.
      * In case of tie, select the first.
      */
-    private JspPropertyGroup selectProperty(JspPropertyGroup prev,
-            JspPropertyGroup curr) {
+    private JspPropertyGroup selectProperty(JspPropertyGroup prev, JspPropertyGroup curr) {
         if (prev == null) {
             return curr;
         }
@@ -262,7 +254,6 @@ public class JspConfig {
         return curr;
     }
 
-
     /**
      * Find a property that best matches the supplied resource.
      * @param uri the resource supplied.
@@ -272,21 +263,20 @@ public class JspConfig {
 
         init();
 
-        // JSP Configuration settings do not apply to tag files	    
-        if (jspProperties == null || uri.endsWith(".tag")
-                || uri.endsWith(".tagx")) {
+        // JSP Configuration settings do not apply to tag files
+        if (jspProperties == null || uri.endsWith(".tag") || uri.endsWith(".tagx")) {
             return defaultJspProperty;
         }
 
         String uriPath = null;
         int index = uri.lastIndexOf('/');
-        if (index >=0 ) {
-            uriPath = uri.substring(0, index+1);
+        if (index >= 0) {
+            uriPath = uri.substring(0, index + 1);
         }
         String uriExtension = null;
         index = uri.lastIndexOf('.');
-        if (index >=0) {
-            uriExtension = uri.substring(index+1);
+        if (index >= 0) {
+            uriExtension = uri.substring(index + 1);
         }
 
         Vector includePreludes = new Vector();
@@ -317,13 +307,11 @@ public class JspConfig {
                 }
             } else {
                 // Matching patterns *.ext or /p/*
-                if (path != null && uriPath != null &&
-                        ! uriPath.startsWith(path)) {
+                if (path != null && uriPath != null && !uriPath.startsWith(path)) {
                     // not matched
                     continue;
                 }
-                if (!extension.equals("*") &&
-                        !extension.equals(uriExtension)) {
+                if (!extension.equals("*") && !extension.equals(uriExtension)) {
                     // not matched
                     continue;
                 }
@@ -346,22 +334,18 @@ public class JspConfig {
                 elIgnoredMatch = selectProperty(elIgnoredMatch, jpg);
             }
             if (jp.isScriptingInvalid() != null) {
-                scriptingInvalidMatch =
-                    selectProperty(scriptingInvalidMatch, jpg);
+                scriptingInvalidMatch = selectProperty(scriptingInvalidMatch, jpg);
             }
             if (jp.getPageEncoding() != null) {
                 pageEncodingMatch = selectProperty(pageEncodingMatch, jpg);
             }
             if (jp.isDeferedSyntaxAllowedAsLiteral() != null) {
-                deferedSyntaxAllowedAsLiteralMatch =
-                    selectProperty(deferedSyntaxAllowedAsLiteralMatch, jpg);
+                deferedSyntaxAllowedAsLiteralMatch = selectProperty(deferedSyntaxAllowedAsLiteralMatch, jpg);
             }
             if (jp.isTrimDirectiveWhitespaces() != null) {
-                trimDirectiveWhitespacesMatch =
-                    selectProperty(trimDirectiveWhitespacesMatch, jpg);
+                trimDirectiveWhitespacesMatch = selectProperty(trimDirectiveWhitespacesMatch, jpg);
             }
         }
-
 
         String isXml = defaultIsXml;
         String isELIgnored = defaultIsELIgnored;
@@ -377,24 +361,29 @@ public class JspConfig {
             isELIgnored = elIgnoredMatch.getJspProperty().isELIgnored();
         }
         if (scriptingInvalidMatch != null) {
-            isScriptingInvalid =
-                scriptingInvalidMatch.getJspProperty().isScriptingInvalid();
+            isScriptingInvalid = scriptingInvalidMatch.getJspProperty().isScriptingInvalid();
         }
         if (pageEncodingMatch != null) {
             pageEncoding = pageEncodingMatch.getJspProperty().getPageEncoding();
         }
         if (deferedSyntaxAllowedAsLiteralMatch != null) {
             isDeferedSyntaxAllowedAsLiteral =
-                deferedSyntaxAllowedAsLiteralMatch.getJspProperty().isDeferedSyntaxAllowedAsLiteral();
+                    deferedSyntaxAllowedAsLiteralMatch.getJspProperty().isDeferedSyntaxAllowedAsLiteral();
         }
         if (trimDirectiveWhitespacesMatch != null) {
             isTrimDirectiveWhitespaces =
-                trimDirectiveWhitespacesMatch.getJspProperty().isTrimDirectiveWhitespaces();
+                    trimDirectiveWhitespacesMatch.getJspProperty().isTrimDirectiveWhitespaces();
         }
 
-        return new JspProperty(isXml, isELIgnored, isScriptingInvalid,
-                pageEncoding, includePreludes, includeCodas, 
-                isDeferedSyntaxAllowedAsLiteral, isTrimDirectiveWhitespaces);
+        return new JspProperty(
+                isXml,
+                isELIgnored,
+                isScriptingInvalid,
+                pageEncoding,
+                includePreludes,
+                includeCodas,
+                isDeferedSyntaxAllowedAsLiteral,
+                isTrimDirectiveWhitespaces);
     }
 
     /**
@@ -410,13 +399,13 @@ public class JspConfig {
 
         String uriPath = null;
         int index = uri.lastIndexOf('/');
-        if (index >=0 ) {
-            uriPath = uri.substring(0, index+1);
+        if (index >= 0) {
+            uriPath = uri.substring(0, index + 1);
         }
         String uriExtension = null;
         index = uri.lastIndexOf('.');
-        if (index >=0) {
-            uriExtension = uri.substring(index+1);
+        if (index >= 0) {
+            uriExtension = uri.substring(index + 1);
         }
 
         Iterator iter = jspProperties.iterator();
@@ -434,8 +423,8 @@ public class JspConfig {
                     return true;
                 }
             } else {
-                if ((path == null || path.equals(uriPath)) &&
-                        (extension.equals("*") || extension.equals(uriExtension))) {
+                if ((path == null || path.equals(uriPath))
+                        && (extension.equals("*") || extension.equals(uriExtension))) {
                     // Matches *, *.ext, /p/*, or /p/*.ext
                     return true;
                 }
@@ -449,8 +438,7 @@ public class JspConfig {
         private String extension;
         private JspProperty jspProperty;
 
-        JspPropertyGroup(String path, String extension,
-                JspProperty jspProperty) {
+        JspPropertyGroup(String path, String extension, JspProperty jspProperty) {
             this.path = path;
             this.extension = extension;
             this.jspProperty = jspProperty;
@@ -469,7 +457,7 @@ public class JspConfig {
         }
     }
 
-    static public class JspProperty {
+    public static class JspProperty {
 
         private String isXml;
         private String elIgnored;
@@ -480,10 +468,14 @@ public class JspConfig {
         private String deferedSyntaxAllowedAsLiteral;
         private String trimDirectiveWhitespaces;
 
-        public JspProperty(String isXml, String elIgnored,
-                String scriptingInvalid, String pageEncoding,
-                Vector includePrelude, Vector includeCoda,
-                String deferedSyntaxAllowedAsLiteral, 
+        public JspProperty(
+                String isXml,
+                String elIgnored,
+                String scriptingInvalid,
+                String pageEncoding,
+                Vector includePrelude,
+                Vector includeCoda,
+                String deferedSyntaxAllowedAsLiteral,
                 String trimDirectiveWhitespaces) {
 
             this.isXml = isXml;
@@ -519,11 +511,11 @@ public class JspConfig {
         public Vector getIncludeCoda() {
             return includeCoda;
         }
-        
+
         public String isDeferedSyntaxAllowedAsLiteral() {
             return deferedSyntaxAllowedAsLiteral;
         }
-        
+
         public String isTrimDirectiveWhitespaces() {
             return trimDirectiveWhitespaces;
         }

@@ -1,28 +1,29 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
 package org.apache.sling.scripting.jsp.jasper.xmlparser;
-
-import java.io.IOException;
-import java.io.InputStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
@@ -41,7 +42,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-
 /**
  * XML parsing utilities for processing web application deployment
  * descriptor and tag library descriptor files.  FIXME - make these
@@ -50,7 +50,6 @@ import org.xml.sax.SAXParseException;
  * @author Craig R. McClanahan
  * @version $Revision: 467222 $ $Date: 2006-10-24 05:17:11 +0200 (Die, 24 Okt 2006) $
  */
-
 public class ParserUtils {
 
     /**
@@ -66,7 +65,6 @@ public class ParserUtils {
     // Turn off for JSP 2.0 until switch over to using xschema.
     public static boolean validating = false;
 
-
     // --------------------------------------------------------- Public Methods
 
     /**
@@ -79,43 +77,38 @@ public class ParserUtils {
      * @exception JasperException if an input/output error occurs
      * @exception JasperException if a parsing error occurs
      */
-    public TreeNode parseXMLDocument(String uri, InputSource is)
-        throws JasperException {
+    public TreeNode parseXMLDocument(String uri, InputSource is) throws JasperException {
 
         Document document = null;
 
         // Perform an XML parse of this document, via JAXP
         try {
-            DocumentBuilderFactory factory =
-                DocumentBuilderFactory.newInstance();
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setNamespaceAware(true);
             factory.setValidating(validating);
             DocumentBuilder builder = factory.newDocumentBuilder();
             builder.setEntityResolver(entityResolver);
             builder.setErrorHandler(errorHandler);
             document = builder.parse(is);
-	} catch (ParserConfigurationException ex) {
-            throw new JasperException
-                (Localizer.getMessage("jsp.error.parse.xml", uri), ex);
-	} catch (SAXParseException ex) {
-            throw new JasperException
-                (Localizer.getMessage("jsp.error.parse.xml.line",
-				      uri,
-				      Integer.toString(ex.getLineNumber()),
-				      Integer.toString(ex.getColumnNumber())),
-		 ex);
-	} catch (SAXException sx) {
-            throw new JasperException
-                (Localizer.getMessage("jsp.error.parse.xml", uri), sx);
+        } catch (ParserConfigurationException ex) {
+            throw new JasperException(Localizer.getMessage("jsp.error.parse.xml", uri), ex);
+        } catch (SAXParseException ex) {
+            throw new JasperException(
+                    Localizer.getMessage(
+                            "jsp.error.parse.xml.line",
+                            uri,
+                            Integer.toString(ex.getLineNumber()),
+                            Integer.toString(ex.getColumnNumber())),
+                    ex);
+        } catch (SAXException sx) {
+            throw new JasperException(Localizer.getMessage("jsp.error.parse.xml", uri), sx);
         } catch (IOException io) {
-            throw new JasperException
-                (Localizer.getMessage("jsp.error.parse.xml", uri), io);
-	}
+            throw new JasperException(Localizer.getMessage("jsp.error.parse.xml", uri), io);
+        }
 
         // Convert the resulting document to a graph of TreeNodes
         return (convert(null, document.getDocumentElement()));
     }
-
 
     /**
      * Parse the specified XML document, and return a <code>TreeNode</code>
@@ -127,15 +120,12 @@ public class ParserUtils {
      * @exception JasperException if an input/output error occurs
      * @exception JasperException if a parsing error occurs
      */
-    public TreeNode parseXMLDocument(String uri, InputStream is)
-            throws JasperException {
+    public TreeNode parseXMLDocument(String uri, InputStream is) throws JasperException {
 
         return (parseXMLDocument(uri, new InputSource(is)));
     }
 
-
     // ------------------------------------------------------ Protected Methods
-
 
     /**
      * Create and return a TreeNode that corresponds to the specified Node,
@@ -155,8 +145,7 @@ public class ParserUtils {
             int n = attributes.getLength();
             for (int i = 0; i < n; i++) {
                 Node attribute = attributes.item(i);
-                treeNode.addAttribute(attribute.getNodeName(),
-                                      attribute.getNodeValue());
+                treeNode.addAttribute(attribute.getNodeName(), attribute.getNodeValue());
             }
         }
 
@@ -166,26 +155,23 @@ public class ParserUtils {
             int n = children.getLength();
             for (int i = 0; i < n; i++) {
                 Node child = children.item(i);
-                if (child instanceof Comment)
-                    continue;
+                if (child instanceof Comment) continue;
                 if (child instanceof Text) {
                     String body = ((Text) child).getData();
                     if (body != null) {
                         body = body.trim();
-                        if (body.length() > 0)
-                            treeNode.setBody(body);
+                        if (body.length() > 0) treeNode.setBody(body);
                     }
                 } else {
                     TreeNode treeChild = convert(treeNode, child);
                 }
             }
         }
-        
+
         // Return the completed TreeNode graph
         return (treeNode);
     }
 }
-
 
 // ------------------------------------------------------------ Private Classes
 
@@ -194,26 +180,21 @@ class MyEntityResolver implements EntityResolver {
     // Logger
     private Log log = LogFactory.getLog(MyEntityResolver.class);
 
-    public InputSource resolveEntity(String publicId, String systemId)
-            throws SAXException {
+    public InputSource resolveEntity(String publicId, String systemId) throws SAXException {
         for (int i = 0; i < Constants.CACHED_DTD_PUBLIC_IDS.length; i++) {
             String cachedDtdPublicId = Constants.CACHED_DTD_PUBLIC_IDS[i];
             if (cachedDtdPublicId.equals(publicId)) {
                 String resourcePath = Constants.CACHED_DTD_RESOURCE_PATHS[i];
-                InputStream input = this.getClass().getResourceAsStream(
-                        resourcePath);
+                InputStream input = this.getClass().getResourceAsStream(resourcePath);
                 if (input == null) {
-                    throw new SAXException(Localizer.getMessage(
-                            "jsp.error.internal.filenotfound", resourcePath));
+                    throw new SAXException(Localizer.getMessage("jsp.error.internal.filenotfound", resourcePath));
                 }
                 InputSource isrc = new InputSource(input);
                 return isrc;
             }
         }
-        if (log.isDebugEnabled())
-            log.debug("Resolve entity failed" + publicId + " " + systemId);
-        log.error(Localizer.getMessage("jsp.error.parse.xml.invalidPublicId",
-                publicId));
+        if (log.isDebugEnabled()) log.debug("Resolve entity failed" + publicId + " " + systemId);
+        log.error(Localizer.getMessage("jsp.error.parse.xml.invalidPublicId", publicId));
         return null;
     }
 }
@@ -224,8 +205,7 @@ class MyErrorHandler implements ErrorHandler {
     private Log log = LogFactory.getLog(MyErrorHandler.class);
 
     public void warning(SAXParseException ex) throws SAXException {
-        if (log.isDebugEnabled())
-            log.debug("ParserUtils: warning ", ex);
+        if (log.isDebugEnabled()) log.debug("ParserUtils: warning ", ex);
         // We ignore warnings
     }
 

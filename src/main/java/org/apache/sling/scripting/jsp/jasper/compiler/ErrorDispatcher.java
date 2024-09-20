@@ -1,18 +1,20 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.sling.scripting.jsp.jasper.compiler;
 
@@ -32,9 +34,9 @@ import org.xml.sax.SAXException;
  *
  * This class is also responsible for localizing any error codes before they
  * are passed on to the configured error handler.
- * 
+ *
  * In the case of a Java compilation error, the compiler error message is
- * parsed into an array of JavacErrorDetail instances, which is passed on to 
+ * parsed into an array of JavacErrorDetail instances, which is passed on to
  * the configured error handler.
  *
  * @author Jan Luehe
@@ -48,7 +50,6 @@ public class ErrorDispatcher {
     // Indicates whether the compilation was initiated by JspServlet or JspC
     private boolean jspcMode = false;
 
-
     /*
      * Constructor.
      *
@@ -56,8 +57,8 @@ public class ErrorDispatcher {
      * otherwise
      */
     public ErrorDispatcher(boolean jspcMode) {
-	// XXX check web.xml for custom error handler
-	errHandler = new DefaultErrorHandler();
+        // XXX check web.xml for custom error handler
+        errHandler = new DefaultErrorHandler();
         this.jspcMode = jspcMode;
     }
 
@@ -71,7 +72,7 @@ public class ErrorDispatcher {
      * @param errCode Error code
      */
     public void jspError(String errCode) throws JasperException {
-	dispatch(null, errCode, null, null);
+        dispatch(null, errCode, null, null);
     }
 
     /*
@@ -85,7 +86,7 @@ public class ErrorDispatcher {
      * @param errCode Error code
      */
     public void jspError(Mark where, String errCode) throws JasperException {
-	dispatch(where, errCode, null, null);
+        dispatch(where, errCode, null, null);
     }
 
     /*
@@ -99,7 +100,7 @@ public class ErrorDispatcher {
      * @param errCode Error code
      */
     public void jspError(Node n, String errCode) throws JasperException {
-	dispatch(n.getStart(), errCode, null, null);
+        dispatch(n.getStart(), errCode, null, null);
     }
 
     /*
@@ -113,7 +114,7 @@ public class ErrorDispatcher {
      * @param arg Argument for parametric replacement
      */
     public void jspError(String errCode, String arg) throws JasperException {
-	dispatch(null, errCode, new Object[] {arg}, null);
+        dispatch(null, errCode, new Object[] {arg}, null);
     }
 
     /*
@@ -127,9 +128,8 @@ public class ErrorDispatcher {
      * @param errCode Error code
      * @param arg Argument for parametric replacement
      */
-    public void jspError(Mark where, String errCode, String arg)
-	        throws JasperException {
-	dispatch(where, errCode, new Object[] {arg}, null);
+    public void jspError(Mark where, String errCode, String arg) throws JasperException {
+        dispatch(where, errCode, new Object[] {arg}, null);
     }
 
     /*
@@ -143,9 +143,8 @@ public class ErrorDispatcher {
      * @param errCode Error code
      * @param arg Argument for parametric replacement
      */
-    public void jspError(Node n, String errCode, String arg)
-	        throws JasperException {
-	dispatch(n.getStart(), errCode, new Object[] {arg}, null);
+    public void jspError(Node n, String errCode, String arg) throws JasperException {
+        dispatch(n.getStart(), errCode, new Object[] {arg}, null);
     }
 
     /*
@@ -159,9 +158,8 @@ public class ErrorDispatcher {
      * @param arg1 First argument for parametric replacement
      * @param arg2 Second argument for parametric replacement
      */
-    public void jspError(String errCode, String arg1, String arg2)
-	        throws JasperException {
-	dispatch(null, errCode, new Object[] {arg1, arg2}, null);
+    public void jspError(String errCode, String arg1, String arg2) throws JasperException {
+        dispatch(null, errCode, new Object[] {arg1, arg2}, null);
     }
 
     /*
@@ -176,9 +174,8 @@ public class ErrorDispatcher {
      * @param arg2 Second argument for parametric replacement
      * @param arg3 Third argument for parametric replacement
      */
-    public void jspError(String errCode, String arg1, String arg2, String arg3)
-	        throws JasperException {
-	dispatch(null, errCode, new Object[] {arg1, arg2, arg3}, null);
+    public void jspError(String errCode, String arg1, String arg2, String arg3) throws JasperException {
+        dispatch(null, errCode, new Object[] {arg1, arg2, arg3}, null);
     }
 
     /*
@@ -193,9 +190,8 @@ public class ErrorDispatcher {
      * @param arg1 First argument for parametric replacement
      * @param arg2 Second argument for parametric replacement
      */
-    public void jspError(Mark where, String errCode, String arg1, String arg2)
-	        throws JasperException {
-	dispatch(where, errCode, new Object[] {arg1, arg2}, null);
+    public void jspError(Mark where, String errCode, String arg1, String arg2) throws JasperException {
+        dispatch(where, errCode, new Object[] {arg1, arg2}, null);
     }
 
     /*
@@ -212,9 +208,7 @@ public class ErrorDispatcher {
      * @param arg3 Third argument for parametric replacement
      */
 
-    public void jspError(Mark where, String errCode, String arg1, String arg2,
-                         String arg3)
-                throws JasperException {
+    public void jspError(Mark where, String errCode, String arg1, String arg2, String arg3) throws JasperException {
         dispatch(where, errCode, new Object[] {arg1, arg2, arg3}, null);
     }
 
@@ -231,9 +225,8 @@ public class ErrorDispatcher {
      * @param arg2 Second argument for parametric replacement
      */
 
-    public void jspError(Node n, String errCode, String arg1, String arg2)
-	        throws JasperException {
-	dispatch(n.getStart(), errCode, new Object[] {arg1, arg2}, null);
+    public void jspError(Node n, String errCode, String arg1, String arg2) throws JasperException {
+        dispatch(n.getStart(), errCode, new Object[] {arg1, arg2}, null);
     }
 
     /*
@@ -250,10 +243,8 @@ public class ErrorDispatcher {
      * @param arg3 Third argument for parametric replacement
      */
 
-    public void jspError(Node n, String errCode, String arg1, String arg2,
-                         String arg3)
-	        throws JasperException {
-	dispatch(n.getStart(), errCode, new Object[] {arg1, arg2, arg3}, null);
+    public void jspError(Node n, String errCode, String arg1, String arg2, String arg3) throws JasperException {
+        dispatch(n.getStart(), errCode, new Object[] {arg1, arg2, arg3}, null);
     }
 
     /*
@@ -262,7 +253,7 @@ public class ErrorDispatcher {
      * @param e Parsing exception
      */
     public void jspError(Exception e) throws JasperException {
-	dispatch(null, null, null, e);
+        dispatch(null, null, null, e);
     }
 
     /*
@@ -276,9 +267,8 @@ public class ErrorDispatcher {
      * @param arg Argument for parametric replacement
      * @param e Parsing exception
      */
-    public void jspError(String errCode, String arg, Exception e)
-	        throws JasperException {
-	dispatch(null, errCode, new Object[] {arg}, e);
+    public void jspError(String errCode, String arg, Exception e) throws JasperException {
+        dispatch(null, errCode, new Object[] {arg}, e);
     }
 
     /*
@@ -293,9 +283,8 @@ public class ErrorDispatcher {
      * @param arg Argument for parametric replacement
      * @param e Parsing exception
      */
-    public void jspError(Node n, String errCode, String arg, Exception e)
-	        throws JasperException {
-	dispatch(n.getStart(), errCode, new Object[] {arg}, e);
+    public void jspError(Node n, String errCode, String arg, Exception e) throws JasperException {
+        dispatch(n.getStart(), errCode, new Object[] {arg}, e);
     }
 
     /**
@@ -310,12 +299,10 @@ public class ErrorDispatcher {
      * @return Array of javac compilation errors, or null if the given error
      * message does not contain any compilation error line numbers
      */
-    public static JavacErrorDetail[] parseJavacErrors(String errMsg,
-                                                      String fname,
-                                                      Node.Nodes page)
+    public static JavacErrorDetail[] parseJavacErrors(String errMsg, String fname, Node.Nodes page)
             throws JasperException, IOException {
 
-	return parseJavacMessage(errMsg, fname, page);
+        return parseJavacMessage(errMsg, fname, page);
     }
 
     /*
@@ -324,12 +311,10 @@ public class ErrorDispatcher {
      *
      * @param javacErrors Array of javac compilation errors
      */
-    public void javacError(JavacErrorDetail[] javacErrors)
-            throws JasperException {
+    public void javacError(JavacErrorDetail[] javacErrors) throws JasperException {
 
         errHandler.javacError(javacErrors);
     }
-
 
     /*
      * Dispatches the given compilation error report and exception to the
@@ -338,14 +323,12 @@ public class ErrorDispatcher {
      * @param errorReport Compilation error report
      * @param e Compilation exception
      */
-    public void javacError(String errorReport, Exception e)
-                throws JasperException {
+    public void javacError(String errorReport, Exception e) throws JasperException {
 
         errHandler.javacError(errorReport, e);
     }
 
-
-    //*********************************************************************
+    // *********************************************************************
     // Private utility methods
 
     /*
@@ -360,24 +343,23 @@ public class ErrorDispatcher {
      * @param args Arguments for parametric replacement
      * @param e Parsing exception
      */
-    private void dispatch(Mark where, String errCode, Object[] args,
-			  Exception e) throws JasperException {
-	String file = null;
-	String errMsg = null;
-	int line = -1;
-	int column = -1;
-	boolean hasLocation = false;
+    private void dispatch(Mark where, String errCode, Object[] args, Exception e) throws JasperException {
+        String file = null;
+        String errMsg = null;
+        int line = -1;
+        int column = -1;
+        boolean hasLocation = false;
 
-	// Localize
-	if (errCode != null) {
-	    errMsg = Localizer.getMessage(errCode, args);
-	} else if (e != null) {
-	    // give a hint about what's wrong
-	    errMsg = e.getMessage();
-	}
+        // Localize
+        if (errCode != null) {
+            errMsg = Localizer.getMessage(errCode, args);
+        } else if (e != null) {
+            // give a hint about what's wrong
+            errMsg = e.getMessage();
+        }
 
-	// Get error location
-	if (where != null) {
+        // Get error location
+        if (where != null) {
             if (jspcMode) {
                 // Get the full URL of the resource that caused the error
                 try {
@@ -391,23 +373,22 @@ public class ErrorDispatcher {
                 // disclose any local filesystem details
                 file = where.getFile();
             }
-	    line = where.getLineNumber();
-	    column = where.getColumnNumber();
-	    hasLocation = true;
-	}
+            line = where.getLineNumber();
+            column = where.getColumnNumber();
+            hasLocation = true;
+        }
 
-	// Get nested exception
-	Exception nestedEx = e;
-	if ((e instanceof SAXException)
-	        && (((SAXException) e).getException() != null)) {
-	    nestedEx = ((SAXException) e).getException();
-	}
+        // Get nested exception
+        Exception nestedEx = e;
+        if ((e instanceof SAXException) && (((SAXException) e).getException() != null)) {
+            nestedEx = ((SAXException) e).getException();
+        }
 
-	if (hasLocation) {
-	    errHandler.jspError(file, line, column, errMsg, nestedEx);
-	} else {
-	    errHandler.jspError(errMsg, nestedEx);
-	}
+        if (hasLocation) {
+            errHandler.jspError(file, line, column, errMsg, nestedEx);
+        } else {
+            errHandler.jspError(errMsg, nestedEx);
+        }
     }
 
     /*
@@ -426,17 +407,16 @@ public class ErrorDispatcher {
      * @return Array of JavacErrorDetail instances corresponding to the
      * compilation errors
      */
-    private static JavacErrorDetail[] parseJavacMessage(
-                                String errMsg, String fname, Node.Nodes page)
-	        throws IOException, JasperException {
+    private static JavacErrorDetail[] parseJavacMessage(String errMsg, String fname, Node.Nodes page)
+            throws IOException, JasperException {
 
         ArrayList<JavacErrorDetail> errors = new ArrayList<JavacErrorDetail>();
         StringBuffer errMsgBuf = null;
         int lineNum = -1;
         JavacErrorDetail javacError = null;
-        
+
         BufferedReader reader = new BufferedReader(new StringReader(errMsg));
-        
+
         /*
          * Parse compilation errors. Each compilation error consists of a file
          * path and error line number, followed by a number of lines describing
@@ -444,55 +424,54 @@ public class ErrorDispatcher {
          */
         String line = null;
         while ((line = reader.readLine()) != null) {
-            
+
             /*
              * Error line number is delimited by set of colons.
              * Ignore colon following drive letter on Windows (fromIndex = 2).
              * XXX Handle deprecation warnings that don't have line info
              */
-            int beginColon = line.indexOf(':', 2); 
+            int beginColon = line.indexOf(':', 2);
             int endColon = line.indexOf(':', beginColon + 1);
             if ((beginColon >= 0) && (endColon >= 0)) {
                 if (javacError != null) {
                     // add previous error to error vector
                     errors.add(javacError);
                 }
-                
+
                 String lineNumStr = line.substring(beginColon + 1, endColon);
                 try {
                     lineNum = Integer.parseInt(lineNumStr);
                 } catch (NumberFormatException e) {
                     lineNum = -1;
                 }
-                
+
                 errMsgBuf = new StringBuffer();
-                
+
                 javacError = createJavacError(fname, page, errMsgBuf, lineNum);
             }
-            
+
             // Ignore messages preceding first error
             if (errMsgBuf != null) {
                 errMsgBuf.append(line);
                 errMsgBuf.append("\n");
             }
         }
-        
+
         // Add last error to error vector
         if (javacError != null) {
             errors.add(javacError);
-        } 
-        
+        }
+
         reader.close();
-        
+
         JavacErrorDetail[] errDetails = null;
         if (errors.size() > 0) {
             errDetails = new JavacErrorDetail[errors.size()];
             errors.toArray(errDetails);
         }
-        
+
         return errDetails;
     }
-
 
     /**
      * @param fname
@@ -502,13 +481,11 @@ public class ErrorDispatcher {
      * @return JavacErrorDetail The error details
      * @throws JasperException
      */
-    public static JavacErrorDetail createJavacError(String fname,
-            Node.Nodes page, StringBuffer errMsgBuf, int lineNum)
-    throws JasperException {
+    public static JavacErrorDetail createJavacError(String fname, Node.Nodes page, StringBuffer errMsgBuf, int lineNum)
+            throws JasperException {
         return createJavacError(fname, page, errMsgBuf, lineNum, null);
     }
-    
-    
+
     /**
      * @param fname
      * @param page
@@ -518,11 +495,11 @@ public class ErrorDispatcher {
      * @return JavacErrorDetail The error details
      * @throws JasperException
      */
-    public static JavacErrorDetail createJavacError(String fname,
-            Node.Nodes page, StringBuffer errMsgBuf, int lineNum,
-            JspCompilationContext ctxt) throws JasperException {
+    public static JavacErrorDetail createJavacError(
+            String fname, Node.Nodes page, StringBuffer errMsgBuf, int lineNum, JspCompilationContext ctxt)
+            throws JasperException {
         JavacErrorDetail javacError = null;
-        
+
         if (page != null) {
             // Attempt to map javac error line number to line in JSP page
             ErrorVisitor errVisitor = new ErrorVisitor(lineNum);
@@ -538,11 +515,11 @@ public class ErrorDispatcher {
                         ctxt);
             }
         }
-        
+
         if (javacError == null) {
             /*
              * javac error line number cannot be mapped to JSP page
-             * line number. For example, this is the case if a 
+             * line number. For example, this is the case if a
              * scriptlet is missing a closing brace, which causes
              * havoc with the try-catch-finally block that the code
              * generator places around all generated code: As a result
@@ -553,14 +530,10 @@ public class ErrorDispatcher {
              * JSP page.
              * Include just the javac error info in the error detail.
              */
-            javacError = new JavacErrorDetail(
-                    fname,
-                    lineNum,
-                    errMsgBuf);
+            javacError = new JavacErrorDetail(fname, lineNum, errMsgBuf);
         }
         return javacError;
     }
-
 
     /*
      * Visitor responsible for mapping a line number in the generated servlet
@@ -568,40 +541,39 @@ public class ErrorDispatcher {
      */
     static class ErrorVisitor extends Node.Visitor {
 
-	// Java source line number to be mapped
-	private int lineNum;
+        // Java source line number to be mapped
+        private int lineNum;
 
-	/*
-	 * JSP node whose Java source code range in the generated servlet
-	 * contains the Java source line number to be mapped
-	 */
-	Node found;
+        /*
+         * JSP node whose Java source code range in the generated servlet
+         * contains the Java source line number to be mapped
+         */
+        Node found;
 
-	/*
-	 * Constructor.
-	 *
-	 * @param lineNum Source line number in the generated servlet code
-	 */
-	public ErrorVisitor(int lineNum) {
-	    this.lineNum = lineNum;
-	}
-
-	public void doVisit(Node n) throws JasperException {
-	    if ((lineNum >= n.getBeginJavaLine())
-		    && (lineNum < n.getEndJavaLine())) {
-		found = n;
-	    }
+        /*
+         * Constructor.
+         *
+         * @param lineNum Source line number in the generated servlet code
+         */
+        public ErrorVisitor(int lineNum) {
+            this.lineNum = lineNum;
         }
 
-	/*
-	 * Gets the JSP node to which the source line number in the generated
-	 * servlet code was mapped.
-	 *
-	 * @return JSP node to which the source line number in the generated
-	 * servlet code was mapped
-	 */
-	public Node getJspSourceNode() {
-	    return found;
-	}
+        public void doVisit(Node n) throws JasperException {
+            if ((lineNum >= n.getBeginJavaLine()) && (lineNum < n.getEndJavaLine())) {
+                found = n;
+            }
+        }
+
+        /*
+         * Gets the JSP node to which the source line number in the generated
+         * servlet code was mapped.
+         *
+         * @return JSP node to which the source line number in the generated
+         * servlet code was mapped
+         */
+        public Node getJspSourceNode() {
+            return found;
+        }
     }
 }

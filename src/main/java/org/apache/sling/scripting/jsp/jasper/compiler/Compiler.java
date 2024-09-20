@@ -1,20 +1,21 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
 package org.apache.sling.scripting.jsp.jasper.compiler;
 
 import java.io.FileNotFoundException;
@@ -39,8 +40,7 @@ import org.apache.sling.scripting.jsp.jasper.compiler.Node.CustomTag;
  */
 public abstract class Compiler {
 
-    protected org.apache.juli.logging.Log log = org.apache.juli.logging.LogFactory
-            .getLog(Compiler.class);
+    protected org.apache.juli.logging.Log log = org.apache.juli.logging.LogFactory.getLog(Compiler.class);
 
     // ----------------------------------------------------- Instance Variables
 
@@ -92,12 +92,13 @@ public abstract class Compiler {
         }
 
         // Setup page info area
-        pageInfo = new PageInfo(new BeanRepository(ctxt.getClassLoader(),
-                errDispatcher), ctxt.getJspFile(), this.ctxt.getOptions().isDefaultSession());
+        pageInfo = new PageInfo(
+                new BeanRepository(ctxt.getClassLoader(), errDispatcher),
+                ctxt.getJspFile(),
+                this.ctxt.getOptions().isDefaultSession());
 
         JspConfig jspConfig = this.ctxt.getOptions().getJspConfig();
-        JspConfig.JspProperty jspProperty = jspConfig.findJspProperty(ctxt
-                .getJspFile());
+        JspConfig.JspProperty jspProperty = jspConfig.findJspProperty(ctxt.getJspFile());
 
         /*
          * If the current uri is matched by a pattern specified in a
@@ -105,12 +106,10 @@ public abstract class Compiler {
          * properties.
          */
         if (jspProperty.isELIgnored() != null) {
-            pageInfo.setELIgnored(JspUtil.booleanValue(jspProperty
-                    .isELIgnored()));
+            pageInfo.setELIgnored(JspUtil.booleanValue(jspProperty.isELIgnored()));
         }
         if (jspProperty.isScriptingInvalid() != null) {
-            pageInfo.setScriptingInvalid(JspUtil.booleanValue(jspProperty
-                    .isScriptingInvalid()));
+            pageInfo.setScriptingInvalid(JspUtil.booleanValue(jspProperty.isScriptingInvalid()));
         }
         if (jspProperty.getIncludePrelude() != null) {
             pageInfo.setIncludePrelude(jspProperty.getIncludePrelude());
@@ -119,12 +118,11 @@ public abstract class Compiler {
             pageInfo.setIncludeCoda(jspProperty.getIncludeCoda());
         }
         if (jspProperty.isDeferedSyntaxAllowedAsLiteral() != null) {
-            pageInfo.setDeferredSyntaxAllowedAsLiteral(JspUtil.booleanValue(jspProperty
-                    .isDeferedSyntaxAllowedAsLiteral()));
+            pageInfo.setDeferredSyntaxAllowedAsLiteral(
+                    JspUtil.booleanValue(jspProperty.isDeferedSyntaxAllowedAsLiteral()));
         }
         if (jspProperty.isTrimDirectiveWhitespaces() != null) {
-            pageInfo.setTrimDirectiveWhitespaces(JspUtil.booleanValue(jspProperty
-                    .isTrimDirectiveWhitespaces()));
+            pageInfo.setTrimDirectiveWhitespaces(JspUtil.booleanValue(jspProperty.isTrimDirectiveWhitespaces()));
         }
 
         ctxt.checkOutputDir();
@@ -137,13 +135,11 @@ public abstract class Compiler {
             OutputStreamWriter osw = null;
 
             try {
-                osw = new OutputStreamWriter(
-                    ctxt.getOutputStream(javaFileName), javaEncoding);
+                osw = new OutputStreamWriter(ctxt.getOutputStream(javaFileName), javaEncoding);
             } catch (UnsupportedEncodingException ex) {
-                errDispatcher.jspError("jsp.error.needAlternateJavaEncoding",
-                        javaEncoding);
+                errDispatcher.jspError("jsp.error.needAlternateJavaEncoding", javaEncoding);
             } catch (IOException ioe) {
-                throw (IOException)new FileNotFoundException(ioe.getMessage()).initCause(ioe);
+                throw (IOException) new FileNotFoundException(ioe.getMessage()).initCause(ioe);
             }
 
             writer = new ServletWriter(new PrintWriter(osw));
@@ -209,8 +205,8 @@ public abstract class Compiler {
 
             if (log.isDebugEnabled()) {
                 t4 = System.currentTimeMillis();
-                log.debug("Generated " + javaFileName + " total=" + (t4 - t1)
-                        + " generate=" + (t4 - t3) + " validate=" + (t2 - t1));
+                log.debug("Generated " + javaFileName + " total=" + (t4 - t1) + " generate=" + (t4 - t3) + " validate="
+                        + (t2 - t1));
             }
 
         } catch (Exception e) {
@@ -248,14 +244,12 @@ public abstract class Compiler {
     /**
      * Compile the servlet from .java file to .class file
      */
-    protected abstract void generateClass(String[] smap)
-            throws FileNotFoundException, JasperException, Exception;
+    protected abstract void generateClass(String[] smap) throws FileNotFoundException, JasperException, Exception;
 
     /**
      * Compile the jsp file from the current engine context
      */
-    public void compile() throws FileNotFoundException, JasperException,
-            Exception {
+    public void compile() throws FileNotFoundException, JasperException, Exception {
         compile(true);
     }
 
@@ -267,8 +261,7 @@ public abstract class Compiler {
      *            If true, generate both .java and .class file If false,
      *            generate only .java file
      */
-    public void compile(boolean compileClass) throws FileNotFoundException,
-            JasperException, Exception {
+    public void compile(boolean compileClass) throws FileNotFoundException, JasperException, Exception {
         compile(compileClass, false);
     }
 
@@ -311,9 +304,9 @@ public abstract class Compiler {
             // In development mode, they are used for detailed
             // error messages.
             // http://issues.apache.org/bugzilla/show_bug.cgi?id=37062
-            //if (!this.options.getDevelopment()) {
+            // if (!this.options.getDevelopment()) {
             //    pageNodes = null;
-            //}
+            // }
 
             if (ctxt.getWriter() != null) {
                 ctxt.getWriter().close();
@@ -373,14 +366,13 @@ public abstract class Compiler {
     }
 
     public void clean() {
-        if ( this.pageNodes != null ) {
+        if (this.pageNodes != null) {
             try {
                 pageNodes.visit(new CleanVisitor());
-            } catch ( final JasperException ignore) {
+            } catch (final JasperException ignore) {
                 // ignore
             }
         }
-
     }
 
     private static final class CleanVisitor extends Node.Visitor {

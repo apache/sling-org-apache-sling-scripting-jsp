@@ -1,28 +1,21 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * ====================================================================
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * This software consists of voluntary contributions made by many
- * individuals on behalf of the Apache Software Foundation and was
- * originally based on software copyright (c) 1999, International
- * Business Machines, Inc., http://www.apache.org.  For more
- * information on the Apache Software Foundation, please see
- * <http://www.apache.org/>.
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
 package org.apache.sling.scripting.jsp.jasper.xmlparser;
 
 /**
@@ -102,7 +95,8 @@ public class SymbolTable {
         // search for identical symbol
         int bucket = hash(symbol) % fTableSize;
         int length = symbol.length();
-        OUTER: for (Entry entry = fBuckets[bucket]; entry != null; entry = entry.next) {
+        OUTER:
+        for (Entry entry = fBuckets[bucket]; entry != null; entry = entry.next) {
             if (length == entry.characters.length) {
                 for (int i = 0; i < length; i++) {
                     if (symbol.charAt(i) != entry.characters[i]) {
@@ -117,7 +111,6 @@ public class SymbolTable {
         Entry entry = new Entry(symbol, fBuckets[bucket]);
         fBuckets[bucket] = entry;
         return entry.symbol;
-
     } // addSymbol(String):String
 
     /**
@@ -134,7 +127,8 @@ public class SymbolTable {
 
         // search for identical symbol
         int bucket = hash(buffer, offset, length) % fTableSize;
-        OUTER: for (Entry entry = fBuckets[bucket]; entry != null; entry = entry.next) {
+        OUTER:
+        for (Entry entry = fBuckets[bucket]; entry != null; entry = entry.next) {
             if (length == entry.characters.length) {
                 for (int i = 0; i < length; i++) {
                     if (buffer[offset + i] != entry.characters[i]) {
@@ -149,7 +143,6 @@ public class SymbolTable {
         Entry entry = new Entry(buffer, offset, length, fBuckets[bucket]);
         fBuckets[bucket] = entry;
         return entry.symbol;
-
     } // addSymbol(char[],int,int):String
 
     /**
@@ -168,7 +161,6 @@ public class SymbolTable {
             code = code * 37 + symbol.charAt(i);
         }
         return code & 0x7FFFFFF;
-
     } // hash(String):int
 
     /**
@@ -189,7 +181,6 @@ public class SymbolTable {
             code = code * 37 + buffer[offset + i];
         }
         return code & 0x7FFFFFF;
-
     } // hash(char[],int,int):int
 
     /**
@@ -203,7 +194,8 @@ public class SymbolTable {
         // search for identical symbol
         int bucket = hash(symbol) % fTableSize;
         int length = symbol.length();
-        OUTER: for (Entry entry = fBuckets[bucket]; entry != null; entry = entry.next) {
+        OUTER:
+        for (Entry entry = fBuckets[bucket]; entry != null; entry = entry.next) {
             if (length == entry.characters.length) {
                 for (int i = 0; i < length; i++) {
                     if (symbol.charAt(i) != entry.characters[i]) {
@@ -215,7 +207,6 @@ public class SymbolTable {
         }
 
         return false;
-
     } // containsSymbol(String):boolean
 
     /**
@@ -230,7 +221,8 @@ public class SymbolTable {
 
         // search for identical symbol
         int bucket = hash(buffer, offset, length) % fTableSize;
-        OUTER: for (Entry entry = fBuckets[bucket]; entry != null; entry = entry.next) {
+        OUTER:
+        for (Entry entry = fBuckets[bucket]; entry != null; entry = entry.next) {
             if (length == entry.characters.length) {
                 for (int i = 0; i < length; i++) {
                     if (buffer[offset + i] != entry.characters[i]) {
@@ -242,7 +234,6 @@ public class SymbolTable {
         }
 
         return false;
-
     } // containsSymbol(char[],int,int):boolean
 
     //
@@ -296,7 +287,5 @@ public class SymbolTable {
             symbol = new String(characters).intern();
             this.next = next;
         }
-
     } // class Entry
-
 } // class SymbolTable

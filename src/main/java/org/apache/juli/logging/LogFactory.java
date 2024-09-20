@@ -29,13 +29,10 @@ public class LogFactory {
      * @exception LogConfigurationException if a suitable <code>Log</code>
      *  instance cannot be returned
      */
-    public static Log getLog(Class<?> clazz)
-        throws LogConfigurationException {
+    public static Log getLog(Class<?> clazz) throws LogConfigurationException {
 
         return getLog(clazz.getName());
-
     }
-
 
     /**
      * Convenience method to return a named logger, without the application
@@ -48,10 +45,8 @@ public class LogFactory {
      * @exception LogConfigurationException if a suitable <code>Log</code>
      *  instance cannot be returned
      */
-    public static Log getLog(String name)
-        throws LogConfigurationException {
+    public static Log getLog(String name) throws LogConfigurationException {
 
         return new Slf4jLog(name);
-
     }
 }

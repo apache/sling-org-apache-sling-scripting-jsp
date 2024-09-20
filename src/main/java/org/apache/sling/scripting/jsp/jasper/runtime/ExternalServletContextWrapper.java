@@ -1,29 +1,22 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements. See the NOTICE file distributed with this
- * work for additional information regarding copyright ownership. The ASF
- * licenses this file to You under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.sling.scripting.jsp.jasper.runtime;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Enumeration;
-import java.util.EventListener;
-import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterRegistration;
@@ -40,6 +33,15 @@ import javax.servlet.SessionTrackingMode;
 import javax.servlet.descriptor.JspConfigDescriptor;
 import javax.servlet.jsp.JspFactory;
 import javax.servlet.jsp.PageContext;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.EventListener;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.sling.scripting.jsp.jasper.compiler.JspRuntimeContext.JspFactoryHandler;
 
@@ -327,36 +329,31 @@ class ExternalServletContextWrapper implements ServletContext {
         }
 
         @Override
-        public void forward(ServletRequest request, ServletResponse response) throws ServletException,
-                IOException {
+        public void forward(ServletRequest request, ServletResponse response) throws ServletException, IOException {
             JspFactory jspFactory = JspFactory.getDefaultFactory();
             if (jspFactory instanceof JspFactoryHandler) {
                 pageContext.getOut().flush();
-                final int count = ((JspFactoryHandler)jspFactory).resetUsage();
+                final int count = ((JspFactoryHandler) jspFactory).resetUsage();
                 try {
                     delegate.forward(request, response);
                 } finally {
-                    ((JspFactoryHandler)jspFactory).setUsage(count);
+                    ((JspFactoryHandler) jspFactory).setUsage(count);
                 }
             }
         }
 
         @Override
-        public void include(ServletRequest request, ServletResponse response) throws ServletException,
-                IOException {
+        public void include(ServletRequest request, ServletResponse response) throws ServletException, IOException {
             JspFactory jspFactory = JspFactory.getDefaultFactory();
             if (jspFactory instanceof JspFactoryHandler) {
                 pageContext.getOut().flush();
-                final int count = ((JspFactoryHandler)jspFactory).resetUsage();
+                final int count = ((JspFactoryHandler) jspFactory).resetUsage();
                 try {
                     delegate.include(request, response);
                 } finally {
-                    ((JspFactoryHandler)jspFactory).setUsage(count);
+                    ((JspFactoryHandler) jspFactory).setUsage(count);
                 }
             }
-
         }
-
     }
-
 }
