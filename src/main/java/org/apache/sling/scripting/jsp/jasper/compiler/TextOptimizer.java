@@ -1,18 +1,20 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.sling.scripting.jsp.jasper.compiler;
 
@@ -44,24 +46,19 @@ public class TextOptimizer {
             collectText();
         }
 
-	/*
+        /*
          * The following directis are ignored in text concatenation
          */
 
-        public void visit(Node.PageDirective n) throws JasperException {
-        }
+        public void visit(Node.PageDirective n) throws JasperException {}
 
-        public void visit(Node.TagDirective n) throws JasperException {
-        }
+        public void visit(Node.TagDirective n) throws JasperException {}
 
-        public void visit(Node.TaglibDirective n) throws JasperException {
-        }
+        public void visit(Node.TaglibDirective n) throws JasperException {}
 
-        public void visit(Node.AttributeDirective n) throws JasperException {
-        }
+        public void visit(Node.AttributeDirective n) throws JasperException {}
 
-        public void visit(Node.VariableDirective n) throws JasperException {
-        }
+        public void visit(Node.VariableDirective n) throws JasperException {}
 
         /*
          * Don't concatenate text across body boundaries
@@ -72,8 +69,7 @@ public class TextOptimizer {
         }
 
         public void visit(Node.TemplateText n) throws JasperException {
-            if ((options.getTrimSpaces() || pageInfo.isTrimDirectiveWhitespaces()) 
-                    && n.isAllSpace()) {
+            if ((options.getTrimSpaces() || pageInfo.isTrimDirectiveWhitespaces()) && n.isAllSpace()) {
                 n.setText(emptyText);
                 return;
             }
@@ -90,7 +86,7 @@ public class TextOptimizer {
 
         /**
          * This method breaks concatenation mode.  As a side effect it copies
-         * the concatenated string to the first text node 
+         * the concatenated string to the first text node
          */
         private void collectText() {
 
@@ -100,16 +96,14 @@ public class TextOptimizer {
             }
             textNodeCount = 0;
         }
-
     }
 
-    public static void concatenate(Compiler compiler, Node.Nodes page)
-            throws JasperException {
+    public static void concatenate(Compiler compiler, Node.Nodes page) throws JasperException {
 
         TextCatVisitor v = new TextCatVisitor(compiler);
         page.visit(v);
 
-	// Cleanup, in case the page ends with a template text
+        // Cleanup, in case the page ends with a template text
         v.collectText();
     }
 }

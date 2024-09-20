@@ -1,25 +1,27 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.sling.scripting.jsp;
 
+import javax.servlet.ServletContext;
+
 import java.util.Map;
 import java.util.TreeMap;
-
-import javax.servlet.ServletContext;
 
 import org.apache.sling.scripting.jsp.jasper.IOProvider;
 import org.apache.sling.scripting.jsp.jasper.Options;
@@ -331,8 +333,10 @@ public class JspServletOptions implements Options {
      * Create an JspServletOptions object using data available from
      * ServletConfig and ServletContext.
      */
-    public JspServletOptions(ServletContext servletContext,
-            IOProvider ioProvider, Map<String, Object> config,
+    public JspServletOptions(
+            ServletContext servletContext,
+            IOProvider ioProvider,
+            Map<String, Object> config,
             TldLocationsCache tldLocationsCache,
             boolean defaultIsSession) {
 
@@ -341,18 +345,17 @@ public class JspServletOptions implements Options {
         this.compilerSourceVM = System.getProperty("java.specification.version");
         this.compilerTargetVM = this.compilerSourceVM;
 
-        for(final Map.Entry<String, Object> entry : config.entrySet()) {
+        for (final Map.Entry<String, Object> entry : config.entrySet()) {
             String key = entry.getKey();
             if (key.startsWith("jasper.")) {
                 final Object value = entry.getValue();
                 if (value != null) {
                     final String strValue = String.valueOf(value).trim();
-                    if ( strValue.length() > 0 ) {
+                    if (strValue.length() > 0) {
                         setProperty(key.substring("jasper.".length()), strValue);
                     }
                 }
             }
-
         }
 
         // quick hack
@@ -400,8 +403,7 @@ public class JspServletOptions implements Options {
 
         this.isPoolingEnabled = true;
         String poolingEnabledParam = getProperty("enablePooling");
-        if (poolingEnabledParam != null
-            && !poolingEnabledParam.equalsIgnoreCase("true")) {
+        if (poolingEnabledParam != null && !poolingEnabledParam.equalsIgnoreCase("true")) {
             if (poolingEnabledParam.equalsIgnoreCase("false")) {
                 this.isPoolingEnabled = false;
             } else {
@@ -508,13 +510,13 @@ public class JspServletOptions implements Options {
         }
 
         final String targetVM = getProperty("compilerTargetVM");
-        if (targetVM != null && !AUTOMATIC_VERSION.equalsIgnoreCase(targetVM) ) {
+        if (targetVM != null && !AUTOMATIC_VERSION.equalsIgnoreCase(targetVM)) {
             this.compilerTargetVM = targetVM;
         }
         this.setProperty("compilerTargetVM", this.compilerTargetVM);
 
         final String sourceVM = getProperty("compilerSourceVM");
-        if (sourceVM != null && !AUTOMATIC_VERSION.equalsIgnoreCase(sourceVM) ) {
+        if (sourceVM != null && !AUTOMATIC_VERSION.equalsIgnoreCase(sourceVM)) {
             this.compilerSourceVM = sourceVM;
         }
         this.setProperty("compilerSourceVM", this.compilerSourceVM);

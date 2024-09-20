@@ -1,23 +1,22 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
 package org.apache.sling.scripting.jsp.jasper.runtime;
-
-import java.io.IOException;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -25,7 +24,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.HttpJspPage;
-import javax.servlet.jsp.JspFactory;
+
+import java.io.IOException;
 
 import org.apache.sling.scripting.jsp.jasper.compiler.Localizer;
 
@@ -34,55 +34,41 @@ import org.apache.sling.scripting.jsp.jasper.compiler.Localizer;
  *
  * @author Anil K. Vijendran
  */
-public abstract class HttpJspBase 
-    extends HttpServlet 
-    implements HttpJspPage 
-        
-    
-{
-    
-    protected HttpJspBase() {
-    }
+public abstract class HttpJspBase extends HttpServlet implements HttpJspPage {
 
-    public final void init(ServletConfig config) 
-	throws ServletException 
-    {
+    protected HttpJspBase() {}
+
+    public final void init(ServletConfig config) throws ServletException {
         super.init(config);
-	jspInit();
+        jspInit();
         _jspInit();
     }
-    
+
     public String getServletInfo() {
-	return Localizer.getMessage("jsp.engine.info");
+        return Localizer.getMessage("jsp.engine.info");
     }
 
     public final void destroy() {
-	jspDestroy();
-	_jspDestroy();
+        jspDestroy();
+        _jspDestroy();
     }
 
     /**
      * Entry point into service.
      */
-    public final void service(HttpServletRequest request, HttpServletResponse response) 
-	throws ServletException, IOException 
-    {
+    public final void service(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         _jspService(request, response);
     }
-    
-    public void jspInit() {
-    }
 
-    public void _jspInit() {
-    }
+    public void jspInit() {}
 
-    public void jspDestroy() {
-    }
+    public void _jspInit() {}
 
-    protected void _jspDestroy() {
-    }
+    public void jspDestroy() {}
 
-    public abstract void _jspService(HttpServletRequest request, 
-				     HttpServletResponse response) 
-	throws ServletException, IOException;
+    protected void _jspDestroy() {}
+
+    public abstract void _jspService(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException;
 }

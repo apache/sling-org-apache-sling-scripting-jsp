@@ -1,21 +1,34 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
 package org.apache.sling.scripting.jsp.jasper.compiler;
+
+import javax.servlet.jsp.tagext.FunctionInfo;
+import javax.servlet.jsp.tagext.PageData;
+import javax.servlet.jsp.tagext.TagAttributeInfo;
+import javax.servlet.jsp.tagext.TagExtraInfo;
+import javax.servlet.jsp.tagext.TagFileInfo;
+import javax.servlet.jsp.tagext.TagInfo;
+import javax.servlet.jsp.tagext.TagLibraryInfo;
+import javax.servlet.jsp.tagext.TagLibraryValidator;
+import javax.servlet.jsp.tagext.TagVariableInfo;
+import javax.servlet.jsp.tagext.ValidationMessage;
+import javax.servlet.jsp.tagext.VariableInfo;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -33,18 +46,6 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
-
-import javax.servlet.jsp.tagext.FunctionInfo;
-import javax.servlet.jsp.tagext.PageData;
-import javax.servlet.jsp.tagext.TagAttributeInfo;
-import javax.servlet.jsp.tagext.TagExtraInfo;
-import javax.servlet.jsp.tagext.TagFileInfo;
-import javax.servlet.jsp.tagext.TagInfo;
-import javax.servlet.jsp.tagext.TagLibraryInfo;
-import javax.servlet.jsp.tagext.TagLibraryValidator;
-import javax.servlet.jsp.tagext.TagVariableInfo;
-import javax.servlet.jsp.tagext.ValidationMessage;
-import javax.servlet.jsp.tagext.VariableInfo;
 
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
@@ -95,14 +96,11 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
         print("uri", uri, out);
         print("tagLibraryValidator", "" + tagLibraryValidator, out);
 
-        for (int i = 0; i < tags.length; i++)
-            out.println(tags[i].toString());
+        for (int i = 0; i < tags.length; i++) out.println(tags[i].toString());
 
-        for (int i = 0; i < tagFiles.length; i++)
-            out.println(tagFiles[i].toString());
+        for (int i = 0; i < tagFiles.length; i++) out.println(tagFiles[i].toString());
 
-        for (int i = 0; i < functions.length; i++)
-            out.println(functions[i].toString());
+        for (int i = 0; i < functions.length; i++) out.println(functions[i].toString());
 
         return sw.toString();
     }
@@ -111,8 +109,7 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
     // resolveRelativeUri and/or getResourceAsStream don't seem to properly
     // handle relative paths when dealing when home and getDocBase are set
     // the following is a workaround until these problems are resolved.
-    private InputStream getResourceAsStream(String uri)
-            throws FileNotFoundException {
+    private InputStream getResourceAsStream(String uri) throws FileNotFoundException {
         try {
             // see if file exists on the filesystem first
             String real = ctxt.getRealPath(uri);
@@ -126,14 +123,19 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
             // the context
             return ctxt.getResourceAsStream(uri);
         }
-
     }
 
     /**
      * Constructor.
      */
-    public TagLibraryInfoImpl(JspCompilationContext ctxt, ParserController pc, PageInfo pi,
-            String prefix, String uriIn, String[] location, ErrorDispatcher err)
+    public TagLibraryInfoImpl(
+            JspCompilationContext ctxt,
+            ParserController pc,
+            PageInfo pi,
+            String prefix,
+            String uriIn,
+            String[] location,
+            ErrorDispatcher err)
             throws JasperException {
         super(prefix, uriIn);
 
@@ -172,8 +174,7 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
                 // Tag library is packaged in JAR file
                 try {
                     URL jarFileUrl = new URL("jar:" + location[0] + "!/");
-                    JarURLConnection conn = (JarURLConnection) jarFileUrl
-                            .openConnection();
+                    JarURLConnection conn = (JarURLConnection) jarFileUrl.openConnection();
                     conn.setUseCaches(false);
                     conn.connect();
                     jarFile = conn.getJarFile();
@@ -181,8 +182,7 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
                     in = jarFile.getInputStream(jarEntry);
                     parseTLD(ctxt, location[0], in, jarFileUrl);
                 } catch (Exception ex) {
-                    err.jspError("jsp.error.tld.unable_to_read", location[0],
-                            location[1], ex.toString());
+                    err.jspError("jsp.error.tld.unable_to_read", location[0], location[1], ex.toString());
                 }
             }
         } finally {
@@ -199,7 +199,6 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
                 }
             }
         }
-
     }
 
     @Override
@@ -213,8 +212,8 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
      * in The TLD's input stream @param jarFileUrl The JAR file containing the
      * TLD, or null if the tag library is not packaged in a JAR
      */
-    private void parseTLD(JspCompilationContext ctxt, String uri,
-            InputStream in, URL jarFileUrl) throws JasperException {
+    private void parseTLD(JspCompilationContext ctxt, String uri, InputStream in, URL jarFileUrl)
+            throws JasperException {
         Vector tagVector = new Vector();
         Vector tagFileVector = new Vector();
         Hashtable functionTable = new Hashtable();
@@ -238,54 +237,43 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
             if ("tlibversion".equals(tname) // JSP 1.1
                     || "tlib-version".equals(tname)) { // JSP 1.2
                 this.tlibversion = element.getBody();
-            } else if ("jspversion".equals(tname)
-                    || "jsp-version".equals(tname)) {
+            } else if ("jspversion".equals(tname) || "jsp-version".equals(tname)) {
                 this.jspversion = element.getBody();
-            } else if ("shortname".equals(tname) || "short-name".equals(tname))
-                this.shortname = element.getBody();
-            else if ("uri".equals(tname))
-                this.urn = element.getBody();
-            else if ("info".equals(tname) || "description".equals(tname))
-                this.info = element.getBody();
-            else if ("validator".equals(tname))
-                this.tagLibraryValidator = createValidator(element);
-            else if ("tag".equals(tname))
-                tagVector.addElement(createTagInfo(element, jspversion));
+            } else if ("shortname".equals(tname) || "short-name".equals(tname)) this.shortname = element.getBody();
+            else if ("uri".equals(tname)) this.urn = element.getBody();
+            else if ("info".equals(tname) || "description".equals(tname)) this.info = element.getBody();
+            else if ("validator".equals(tname)) this.tagLibraryValidator = createValidator(element);
+            else if ("tag".equals(tname)) tagVector.addElement(createTagInfo(element, jspversion));
             else if ("tag-file".equals(tname)) {
-                TagFileInfo tagFileInfo = createTagFileInfo(element, uri,
-                        jarFileUrl);
+                TagFileInfo tagFileInfo = createTagFileInfo(element, uri, jarFileUrl);
                 tagFileVector.addElement(tagFileInfo);
             } else if ("function".equals(tname)) { // JSP2.0
                 FunctionInfo funcInfo = createFunctionInfo(element);
                 String funcName = funcInfo.getName();
                 if (functionTable.containsKey(funcName)) {
-                    err.jspError("jsp.error.tld.fn.duplicate.name", funcName,
-                            uri);
-
+                    err.jspError("jsp.error.tld.fn.duplicate.name", funcName, uri);
                 }
                 functionTable.put(funcName, funcInfo);
-            } else if ("display-name".equals(tname) || // Ignored elements
-                    "small-icon".equals(tname) || "large-icon".equals(tname)
+            } else if ("display-name".equals(tname)
+                    || // Ignored elements
+                    "small-icon".equals(tname)
+                    || "large-icon".equals(tname)
                     || "listener".equals(tname)) {
                 ;
             } else if ("taglib-extension".equals(tname)) {
                 // Recognized but ignored
             } else {
                 if (log.isWarnEnabled()) {
-                    log.warn(Localizer.getMessage(
-                            "jsp.warning.unknown.element.in.taglib", tname));
+                    log.warn(Localizer.getMessage("jsp.warning.unknown.element.in.taglib", tname));
                 }
             }
-
         }
 
         if (tlibversion == null) {
-            err.jspError("jsp.error.tld.mandatory.element.missing",
-                    "tlib-version");
+            err.jspError("jsp.error.tld.mandatory.element.missing", "tlib-version");
         }
         if (jspversion == null) {
-            err.jspError("jsp.error.tld.mandatory.element.missing",
-                    "jsp-version");
+            err.jspError("jsp.error.tld.mandatory.element.missing", "jsp-version");
         }
 
         this.tags = new TagInfo[tagVector.size()];
@@ -310,13 +298,11 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
      * the name of the TLD entry in the jar file, which is hardcoded to
      * META-INF/taglib.tld.
      */
-    private String[] generateTLDLocation(String uri, JspCompilationContext ctxt)
-            throws JasperException {
+    private String[] generateTLDLocation(String uri, JspCompilationContext ctxt) throws JasperException {
 
         int uriType = TldLocationsCache.uriType(uri);
         if (uriType == TldLocationsCache.ABS_URI) {
-            err.jspError("jsp.error.taglibDirective.absUriCannotBeResolved",
-                    uri);
+            err.jspError("jsp.error.taglibDirective.absUriCannotBeResolved", uri);
         } else if (uriType == TldLocationsCache.NOROOT_REL_URI) {
             uri = ctxt.resolveRelativeUri(uri);
         }
@@ -328,8 +314,7 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
             try {
                 url = ctxt.getResource(location[0]);
             } catch (Exception ex) {
-                err.jspError("jsp.error.tld.unable_to_get_jar", location[0], ex
-                        .toString());
+                err.jspError("jsp.error.tld.unable_to_get_jar", location[0], ex.toString());
             }
             if (url == null) {
                 err.jspError("jsp.error.tld.missing_jar", location[0]);
@@ -341,8 +326,7 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
         return location;
     }
 
-    private TagInfo createTagInfo(TreeNode elem, String jspVersion)
-            throws JasperException {
+    private TagInfo createTagInfo(TreeNode elem, String jspVersion) throws JasperException {
 
         String tagName = null;
         String tagClassName = null;
@@ -374,8 +358,7 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
                 tagClassName = element.getBody();
             } else if ("teiclass".equals(tname) || "tei-class".equals(tname)) {
                 teiClassName = element.getBody();
-            } else if ("bodycontent".equals(tname)
-                    || "body-content".equals(tname)) {
+            } else if ("bodycontent".equals(tname) || "body-content".equals(tname)) {
                 bodycontent = element.getBody();
             } else if ("display-name".equals(tname)) {
                 displayName = element.getBody();
@@ -397,8 +380,7 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
             } else if ("variable".equals(tname)) {
                 variableVector.addElement(createVariable(element));
             } else if ("attribute".equals(tname)) {
-                attributeVector
-                        .addElement(createAttribute(element, jspVersion));
+                attributeVector.addElement(createAttribute(element, jspVersion));
             } else if ("dynamic-attributes".equals(tname)) {
                 dynamicAttributes = JspUtil.booleanValue(element.getBody());
             } else if ("example".equals(tname)) {
@@ -407,8 +389,7 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
                 // Ignored
             } else {
                 if (log.isWarnEnabled()) {
-                    log.warn(Localizer.getMessage(
-                            "jsp.warning.unknown.element.in.tag", tname));
+                    log.warn(Localizer.getMessage("jsp.warning.unknown.element.in.tag", tname));
                 }
             }
         }
@@ -419,22 +400,29 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
                 Class teiClass = ctxt.getClassLoader().loadClass(teiClassName);
                 tei = (TagExtraInfo) teiClass.newInstance();
             } catch (Exception e) {
-                err.jspError("jsp.error.teiclass.instantiation", teiClassName,
-                        e);
+                err.jspError("jsp.error.teiclass.instantiation", teiClassName, e);
             }
         }
 
-        TagAttributeInfo[] tagAttributeInfo = new TagAttributeInfo[attributeVector
-                .size()];
+        TagAttributeInfo[] tagAttributeInfo = new TagAttributeInfo[attributeVector.size()];
         attributeVector.copyInto(tagAttributeInfo);
 
-        TagVariableInfo[] tagVariableInfos = new TagVariableInfo[variableVector
-                .size()];
+        TagVariableInfo[] tagVariableInfos = new TagVariableInfo[variableVector.size()];
         variableVector.copyInto(tagVariableInfos);
 
-        TagInfo taginfo = new TagInfo(tagName, tagClassName, bodycontent, info,
-                this, tei, tagAttributeInfo, displayName, smallIcon, largeIcon,
-                tagVariableInfos, dynamicAttributes);
+        TagInfo taginfo = new TagInfo(
+                tagName,
+                tagClassName,
+                bodycontent,
+                info,
+                this,
+                tei,
+                tagAttributeInfo,
+                displayName,
+                smallIcon,
+                largeIcon,
+                tagVariableInfos,
+                dynamicAttributes);
         return taginfo;
     }
 
@@ -448,8 +436,7 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
      *
      * @return TagInfo correspoding to tag file directives
      */
-    private TagFileInfo createTagFileInfo(TreeNode elem, String uri,
-            URL jarFileUrl) throws JasperException {
+    private TagFileInfo createTagFileInfo(TreeNode elem, String uri, URL jarFileUrl) throws JasperException {
 
         String name = null;
         String path = null;
@@ -466,28 +453,25 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
                 // Ignore <example> element: Bugzilla 33538
             } else if ("tag-extension".equals(tname)) {
                 // Ignore <tag-extension> element: Bugzilla 33538
-            } else if ("icon".equals(tname)
-                    || "display-name".equals(tname)
-                    || "description".equals(tname)) {
+            } else if ("icon".equals(tname) || "display-name".equals(tname) || "description".equals(tname)) {
                 // Ignore these elements: Bugzilla 38015
             } else {
                 if (log.isWarnEnabled()) {
-                    log.warn(Localizer.getMessage(
-                            "jsp.warning.unknown.element.in.tagfile", tname));
+                    log.warn(Localizer.getMessage("jsp.warning.unknown.element.in.tagfile", tname));
                 }
             }
         }
 
         if (path.startsWith("/META-INF/tags")) {
             // Tag file packaged in JAR
-            if ( jarFileUrl != null ) {
+            if (jarFileUrl != null) {
                 ctxt.setTagFileJarUrl(path, jarFileUrl);
             } else {
                 final URL baseUrl = ctxt.getOptions().getTldLocationsCache().getTldLocationURL(uri);
-                if ( baseUrl != null ) {
+                if (baseUrl != null) {
                     final String baseUrlStr = baseUrl.toString();
                     final int index = baseUrlStr.indexOf("/META-INF/");
-                    if ( index != -1 ) {
+                    if (index != -1) {
                         URL finalUrl;
                         try {
                             finalUrl = new URL(baseUrlStr.substring(0, index) + path);
@@ -502,8 +486,7 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
             err.jspError("jsp.error.tagfile.illegalPath", path);
         }
 
-        TagInfo tagInfo = TagFileProcessor.parseTagFileDirectives(
-                parserController, name, path, this);
+        TagInfo tagInfo = TagFileProcessor.parseTagFileDirectives(parserController, name, path, this);
         return new TagFileInfo(name, path, tagInfo);
     }
 
@@ -512,7 +495,11 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
         String type = null;
         String expectedType = null;
         String methodSignature = null;
-        boolean required = false, rtexprvalue = false, isFragment = false, deferredValue = false, deferredMethod = false;
+        boolean required = false,
+                rtexprvalue = false,
+                isFragment = false,
+                deferredValue = false,
+                deferredMethod = false;
 
         Iterator list = elem.findChildren();
         while (list.hasNext()) {
@@ -523,23 +510,23 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
                 name = element.getBody();
             } else if ("required".equals(tname)) {
                 String s = element.getBody();
-                if (s != null)
-                    required = JspUtil.booleanValue(s);
+                if (s != null) required = JspUtil.booleanValue(s);
             } else if ("rtexprvalue".equals(tname)) {
                 String s = element.getBody();
-                if (s != null)
-                    rtexprvalue = JspUtil.booleanValue(s);
+                if (s != null) rtexprvalue = JspUtil.booleanValue(s);
             } else if ("type".equals(tname)) {
                 type = element.getBody();
                 if ("1.2".equals(jspVersion)
-                        && (type.equals("Boolean") || type.equals("Byte")
+                        && (type.equals("Boolean")
+                                || type.equals("Byte")
                                 || type.equals("Character")
                                 || type.equals("Double")
                                 || type.equals("Float")
                                 || type.equals("Integer")
-                                || type.equals("Long") || type.equals("Object")
-                                || type.equals("Short") || type
-                                .equals("String"))) {
+                                || type.equals("Long")
+                                || type.equals("Object")
+                                || type.equals("Short")
+                                || type.equals("String"))) {
                     type = "java.lang." + type;
                 }
             } else if ("fragment".equals(tname)) {
@@ -571,13 +558,13 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
                 } else {
                     methodSignature = "java.lang.Object method()";
                 }
-            } else if ("description".equals(tname) || // Ignored elements
-            false) {
+            } else if ("description".equals(tname)
+                    || // Ignored elements
+                    false) {
                 ;
             } else {
                 if (log.isWarnEnabled()) {
-                    log.warn(Localizer.getMessage(
-                            "jsp.warning.unknown.element.in.attribute", tname));
+                    log.warn(Localizer.getMessage("jsp.warning.unknown.element.in.attribute", tname));
                 }
             }
         }
@@ -601,8 +588,16 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
             type = "java.lang.String";
         }
 
-        return new TagAttributeInfo(name, required, type, rtexprvalue,
-                isFragment, null, deferredValue, deferredMethod, expectedType,
+        return new TagAttributeInfo(
+                name,
+                required,
+                type,
+                rtexprvalue,
+                isFragment,
+                null,
+                deferredValue,
+                deferredMethod,
+                expectedType,
                 methodSignature);
     }
 
@@ -617,16 +612,12 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
         while (list.hasNext()) {
             TreeNode element = (TreeNode) list.next();
             String tname = element.getName();
-            if ("name-given".equals(tname))
-                nameGiven = element.getBody();
-            else if ("name-from-attribute".equals(tname))
-                nameFromAttribute = element.getBody();
-            else if ("variable-class".equals(tname))
-                className = element.getBody();
+            if ("name-given".equals(tname)) nameGiven = element.getBody();
+            else if ("name-from-attribute".equals(tname)) nameFromAttribute = element.getBody();
+            else if ("variable-class".equals(tname)) className = element.getBody();
             else if ("declare".equals(tname)) {
                 String s = element.getBody();
-                if (s != null)
-                    declare = JspUtil.booleanValue(s);
+                if (s != null) declare = JspUtil.booleanValue(s);
             } else if ("scope".equals(tname)) {
                 String s = element.getBody();
                 if (s != null) {
@@ -638,21 +629,19 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
                         scope = VariableInfo.AT_END;
                     }
                 }
-            } else if ("description".equals(tname) || // Ignored elements
-            false) {
+            } else if ("description".equals(tname)
+                    || // Ignored elements
+                    false) {
             } else {
                 if (log.isWarnEnabled()) {
-                    log.warn(Localizer.getMessage(
-                            "jsp.warning.unknown.element.in.variable", tname));
+                    log.warn(Localizer.getMessage("jsp.warning.unknown.element.in.variable", tname));
                 }
             }
         }
-        return new TagVariableInfo(nameGiven, nameFromAttribute, className,
-                declare, scope);
+        return new TagVariableInfo(nameGiven, nameFromAttribute, className, declare, scope);
     }
 
-    private TagLibraryValidator createValidator(TreeNode elem)
-            throws JasperException {
+    private TagLibraryValidator createValidator(TreeNode elem) throws JasperException {
 
         String validatorClass = null;
         Map initParams = new Hashtable();
@@ -661,17 +650,16 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
         while (list.hasNext()) {
             TreeNode element = (TreeNode) list.next();
             String tname = element.getName();
-            if ("validator-class".equals(tname))
-                validatorClass = element.getBody();
+            if ("validator-class".equals(tname)) validatorClass = element.getBody();
             else if ("init-param".equals(tname)) {
                 String[] initParam = createInitParam(element);
                 initParams.put(initParam[0], initParam[1]);
-            } else if ("description".equals(tname) || // Ignored elements
-            false) {
+            } else if ("description".equals(tname)
+                    || // Ignored elements
+                    false) {
             } else {
                 if (log.isWarnEnabled()) {
-                    log.warn(Localizer.getMessage(
-                            "jsp.warning.unknown.element.in.validator", tname));
+                    log.warn(Localizer.getMessage("jsp.warning.unknown.element.in.validator", tname));
                 }
             }
         }
@@ -679,12 +667,10 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
         TagLibraryValidator tlv = null;
         if (validatorClass != null && !validatorClass.equals("")) {
             try {
-                Class tlvClass = ctxt.getClassLoader()
-                        .loadClass(validatorClass);
+                Class tlvClass = ctxt.getClassLoader().loadClass(validatorClass);
                 tlv = (TagLibraryValidator) tlvClass.newInstance();
             } catch (Exception e) {
-                err.jspError("jsp.error.tlvclass.instantiation",
-                        validatorClass, e);
+                err.jspError("jsp.error.tlvclass.instantiation", validatorClass, e);
             }
         }
         if (tlv != null) {
@@ -708,8 +694,7 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
                 ; // Do nothing
             } else {
                 if (log.isWarnEnabled()) {
-                    log.warn(Localizer.getMessage(
-                            "jsp.warning.unknown.element.in.initParam", tname));
+                    log.warn(Localizer.getMessage("jsp.warning.unknown.element.in.initParam", tname));
                 }
             }
         }
@@ -733,13 +718,15 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
                 klass = element.getBody();
             } else if ("function-signature".equals(tname)) {
                 signature = element.getBody();
-            } else if ("display-name".equals(tname) || // Ignored elements
-                    "small-icon".equals(tname) || "large-icon".equals(tname)
-                    || "description".equals(tname) || "example".equals(tname)) {
+            } else if ("display-name".equals(tname)
+                    || // Ignored elements
+                    "small-icon".equals(tname)
+                    || "large-icon".equals(tname)
+                    || "description".equals(tname)
+                    || "example".equals(tname)) {
             } else {
                 if (log.isWarnEnabled()) {
-                    log.warn(Localizer.getMessage(
-                            "jsp.warning.unknown.element.in.function", tname));
+                    log.warn(Localizer.getMessage("jsp.warning.unknown.element.in.function", tname));
                 }
             }
         }
@@ -770,8 +757,7 @@ class TagLibraryInfoImpl extends TagLibraryInfo implements TagConstants {
      */
     public ValidationMessage[] validate(PageData thePage) {
         TagLibraryValidator tlv = getTagLibraryValidator();
-        if (tlv == null)
-            return null;
+        if (tlv == null) return null;
 
         String uri = getURI();
         if (uri.startsWith("/")) {

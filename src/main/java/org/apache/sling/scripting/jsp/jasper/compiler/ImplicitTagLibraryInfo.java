@@ -1,21 +1,27 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
 package org.apache.sling.scripting.jsp.jasper.compiler;
+
+import javax.servlet.jsp.tagext.FunctionInfo;
+import javax.servlet.jsp.tagext.TagFileInfo;
+import javax.servlet.jsp.tagext.TagInfo;
+import javax.servlet.jsp.tagext.TagLibraryInfo;
 
 import java.io.InputStream;
 import java.util.Collection;
@@ -24,11 +30,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.Vector;
 
-import javax.servlet.jsp.tagext.FunctionInfo;
-import javax.servlet.jsp.tagext.TagFileInfo;
-import javax.servlet.jsp.tagext.TagInfo;
-import javax.servlet.jsp.tagext.TagLibraryInfo;
-
 import org.apache.sling.scripting.jsp.jasper.JasperException;
 import org.apache.sling.scripting.jsp.jasper.JspCompilationContext;
 import org.apache.sling.scripting.jsp.jasper.xmlparser.ParserUtils;
@@ -36,7 +37,7 @@ import org.apache.sling.scripting.jsp.jasper.xmlparser.TreeNode;
 
 /**
  * Class responsible for generating an implicit tag library containing tag
- * handlers corresponding to the tag files in "/WEB-INF/tags/" or a 
+ * handlers corresponding to the tag files in "/WEB-INF/tags/" or a
  * subdirectory of it.
  *
  * @author Jan Luehe
@@ -61,12 +62,14 @@ class ImplicitTagLibraryInfo extends TagLibraryInfo {
     /**
      * Constructor.
      */
-    public ImplicitTagLibraryInfo(JspCompilationContext ctxt,
+    public ImplicitTagLibraryInfo(
+            JspCompilationContext ctxt,
             ParserController pc,
             PageInfo pi,
             String prefix,
             String tagdir,
-            ErrorDispatcher err) throws JasperException {
+            ErrorDispatcher err)
+            throws JasperException {
         super(prefix, null);
         this.pc = pc;
         this.pi = pi;
@@ -85,8 +88,7 @@ class ImplicitTagLibraryInfo extends TagLibraryInfo {
 
         // Determine the value of the <short-name> subelement of the
         // "imaginary" <taglib> element
-        if (tagdir.equals(WEB_INF_TAGS)
-                || tagdir.equals( WEB_INF_TAGS + "/")) {
+        if (tagdir.equals(WEB_INF_TAGS) || tagdir.equals(WEB_INF_TAGS + "/")) {
             shortname = TAGS_SHORTNAME;
         } else {
             shortname = tagdir.substring(WEB_INF_TAGS.length());
@@ -99,30 +101,27 @@ class ImplicitTagLibraryInfo extends TagLibraryInfo {
             Iterator it = dirList.iterator();
             while (it.hasNext()) {
                 String path = (String) it.next();
-                if (path.endsWith(TAG_FILE_SUFFIX)
-                        || path.endsWith(TAGX_FILE_SUFFIX)) {
+                if (path.endsWith(TAG_FILE_SUFFIX) || path.endsWith(TAGX_FILE_SUFFIX)) {
                     /*
                      * Use the filename of the tag file, without the .tag or
                      * .tagx extension, respectively, as the <name> subelement
                      * of the "imaginary" <tag-file> element
                      */
-                    String suffix = path.endsWith(TAG_FILE_SUFFIX) ?
-                            TAG_FILE_SUFFIX : TAGX_FILE_SUFFIX; 
+                    String suffix = path.endsWith(TAG_FILE_SUFFIX) ? TAG_FILE_SUFFIX : TAGX_FILE_SUFFIX;
                     String tagName = path.substring(path.lastIndexOf("/") + 1);
-                    tagName = tagName.substring(0,
-                            tagName.lastIndexOf(suffix));
+                    tagName = tagName.substring(0, tagName.lastIndexOf(suffix));
                     tagFileMap.put(tagName, path);
                 } else if (path.endsWith(IMPLICIT_TLD)) {
                     InputStream in = null;
                     try {
                         in = ctxt.getResourceAsStream(path);
                         if (in != null) {
-                            
+
                             // Add implicit TLD to dependency list
                             if (pi != null) {
                                 pi.addDependant(path);
                             }
-                            
+
                             ParserUtils pu = new ParserUtils();
                             TreeNode tld = pu.parseXMLDocument(uri, in);
 
@@ -140,8 +139,7 @@ class ImplicitTagLibraryInfo extends TagLibraryInfo {
                                 if ("tlibversion".equals(tname) // JSP 1.1
                                         || "tlib-version".equals(tname)) { // JSP 1.2
                                     this.tlibversion = element.getBody();
-                                } else if ("jspversion".equals(tname)
-                                        || "jsp-version".equals(tname)) {
+                                } else if ("jspversion".equals(tname) || "jsp-version".equals(tname)) {
                                     this.jspversion = element.getBody();
                                 } else if ("shortname".equals(tname) || "short-name".equals(tname)) {
                                     // Ignore
@@ -169,8 +167,7 @@ class ImplicitTagLibraryInfo extends TagLibraryInfo {
                     }
                 }
             }
-        }        
-        
+        }
     }
 
     /**
@@ -191,10 +188,7 @@ class ImplicitTagLibraryInfo extends TagLibraryInfo {
 
             TagInfo tagInfo = null;
             try {
-                tagInfo = TagFileProcessor.parseTagFileDirectives(pc,
-                        shortName,
-                        path,
-                        this);
+                tagInfo = TagFileProcessor.parseTagFileDirectives(pc, shortName, path, this);
             } catch (JasperException je) {
                 throw new RuntimeException(je.toString(), je);
             }
@@ -213,5 +207,4 @@ class ImplicitTagLibraryInfo extends TagLibraryInfo {
         Collection coll = pi.getTaglibs();
         return (TagLibraryInfo[]) coll.toArray(new TagLibraryInfo[0]);
     }
-
 }

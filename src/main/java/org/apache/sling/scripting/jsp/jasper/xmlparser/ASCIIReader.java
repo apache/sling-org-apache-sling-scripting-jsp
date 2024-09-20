@@ -1,24 +1,25 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
 package org.apache.sling.scripting.jsp.jasper.xmlparser;
 
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 
 import org.apache.sling.scripting.jsp.jasper.compiler.Localizer;
@@ -31,8 +32,7 @@ import org.apache.sling.scripting.jsp.jasper.compiler.Localizer;
  *
  * @version $Id: ASCIIReader.java 467222 2006-10-24 03:17:11Z markt $
  */
-public class ASCIIReader
-    extends Reader {
+public class ASCIIReader extends Reader {
 
     //
     // Constants
@@ -55,8 +55,8 @@ public class ASCIIReader
     // Constructors
     //
 
-    /** 
-     * Constructs an ASCII reader from the specified input stream 
+    /**
+     * Constructs an ASCII reader from the specified input stream
      * and buffer size.
      *
      * @param inputStream The input stream.
@@ -87,8 +87,7 @@ public class ASCIIReader
     public int read() throws IOException {
         int b0 = fInputStream.read();
         if (b0 > 0x80) {
-            throw new IOException(Localizer.getMessage("jsp.error.xml.invalidASCII",
-						       Integer.toString(b0)));
+            throw new IOException(Localizer.getMessage("jsp.error.xml.invalidASCII", Integer.toString(b0)));
         }
         return b0;
     } // read():int
@@ -115,10 +114,9 @@ public class ASCIIReader
         for (int i = 0; i < count; i++) {
             int b0 = fBuffer[i];
             if (b0 > 0x80) {
-                throw new IOException(Localizer.getMessage("jsp.error.xml.invalidASCII",
-							   Integer.toString(b0)));
+                throw new IOException(Localizer.getMessage("jsp.error.xml.invalidASCII", Integer.toString(b0)));
             }
-            ch[offset + i] = (char)b0;
+            ch[offset + i] = (char) b0;
         }
         return count;
     } // read(char[],int,int)
@@ -147,14 +145,14 @@ public class ASCIIReader
      * @exception  IOException  If an I/O error occurs
      */
     public boolean ready() throws IOException {
-	return false;
+        return false;
     } // ready()
 
     /**
      * Tell whether this stream supports the mark() operation.
      */
     public boolean markSupported() {
-	return fInputStream.markSupported();
+        return fInputStream.markSupported();
     } // markSupported()
 
     /**
@@ -171,7 +169,7 @@ public class ASCIIReader
      *                          or if some other I/O error occurs
      */
     public void mark(int readAheadLimit) throws IOException {
-	fInputStream.mark(readAheadLimit);
+        fInputStream.mark(readAheadLimit);
     } // mark(int)
 
     /**
@@ -198,8 +196,7 @@ public class ASCIIReader
      *
      * @exception  IOException  If an I/O error occurs
      */
-     public void close() throws IOException {
-         fInputStream.close();
-     } // close()
-
+    public void close() throws IOException {
+        fInputStream.close();
+    } // close()
 } // class ASCIIReader

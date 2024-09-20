@@ -1,20 +1,25 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.sling.scripting.jsp.jasper;
+
+import javax.servlet.ServletContext;
+import javax.servlet.jsp.tagext.TagInfo;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -26,9 +31,6 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import javax.servlet.ServletContext;
-import javax.servlet.jsp.tagext.TagInfo;
 
 import org.apache.sling.commons.compiler.source.JavaEscapeHelper;
 import org.apache.sling.scripting.jsp.jasper.compiler.Compiler;
@@ -79,21 +81,19 @@ public class JspCompilationContext {
     private volatile TagInfo tagInfo;
     private volatile URL tagFileJarUrl;
 
-    public JspCompilationContext(String jspUri,
-                                 boolean isErrPage,
-                                 Options options,
-                                 ServletContext context,
-                                 JspRuntimeContext rctxt) {
+    public JspCompilationContext(
+            String jspUri, boolean isErrPage, Options options, ServletContext context, JspRuntimeContext rctxt) {
         this(jspUri, isErrPage, options, context, rctxt, Constants.JSP_PACKAGE_NAME);
     }
 
     // jspURI _must_ be relative to the context
-    public JspCompilationContext(String jspUri,
-                                 boolean isErrPage,
-                                 Options options,
-                                 ServletContext context,
-                                 JspRuntimeContext rctxt,
-                                 String basePckName) {
+    public JspCompilationContext(
+            String jspUri,
+            boolean isErrPage,
+            Options options,
+            ServletContext context,
+            JspRuntimeContext rctxt,
+            String basePckName) {
 
         this.jspUri = canonicalURI(jspUri);
         this.isErrPage = isErrPage;
@@ -118,12 +118,13 @@ public class JspCompilationContext {
         this.basePackageName = basePckName;
     }
 
-    public JspCompilationContext(String tagfile,
-                                 TagInfo tagInfo,
-                                 Options options,
-                                 ServletContext context,
-                                 JspRuntimeContext rctxt,
-                                 URL tagFileJarUrl) {
+    public JspCompilationContext(
+            String tagfile,
+            TagInfo tagInfo,
+            Options options,
+            ServletContext context,
+            JspRuntimeContext rctxt,
+            URL tagFileJarUrl) {
         this(tagfile, false, options, context, rctxt);
         this.isTagFile = true;
         this.tagInfo = tagInfo;
@@ -157,8 +158,7 @@ public class JspCompilationContext {
      * @throws FileNotFoundException If the file cannot be found
      * @throws IOException If an error occurrs creating the intput stream.
      */
-    public InputStream getInputStream(String fileName)
-            throws FileNotFoundException, IOException {
+    public InputStream getInputStream(String fileName) throws FileNotFoundException, IOException {
         return getRuntimeContext().getIOProvider().getInputStream(fileName);
     }
 
@@ -186,9 +186,9 @@ public class JspCompilationContext {
      * plus the directory derived from the package name.
      */
     public String getOutputDir() {
-    	if (outputDir == null) {
-	        createOutputDir();
-	    }
+        if (outputDir == null) {
+            createOutputDir();
+        }
 
         return outputDir;
     }
@@ -199,7 +199,7 @@ public class JspCompilationContext {
      * compilers that are created.
      */
     private Compiler createCompiler() {
-        if (jspCompiler != null ) {
+        if (jspCompiler != null) {
             return jspCompiler;
         }
         jspCompiler = new JDTCompiler(this);
@@ -211,9 +211,9 @@ public class JspCompilationContext {
     }
 
     public Compiler activateCompiler() {
-        if ( jspCompiler == null ) {
-            synchronized ( this ) {
-                if ( jspCompiler == null ) {
+        if (jspCompiler == null) {
+            synchronized (this) {
+                if (jspCompiler == null) {
                     // create compile and compile
                     this.compile(); // we ignore the exception
                 }
@@ -246,7 +246,6 @@ public class JspCompilationContext {
     public java.io.InputStream getResourceAsStream(String res) {
         return context.getResourceAsStream(canonicalURI(res));
     }
-
 
     public URL getResource(String res) throws MalformedURLException {
         return context.getResource(canonicalURI(res));
@@ -402,8 +401,7 @@ public class JspCompilationContext {
     protected String getDerivedPackageName() {
         if (derivedPackageName == null) {
             int iSep = jspUri.lastIndexOf('/');
-            derivedPackageName = (iSep > 0) ?
-                    JavaEscapeHelper.makeJavaPackage(jspUri.substring(1,iSep)) : "";
+            derivedPackageName = (iSep > 0) ? JavaEscapeHelper.makeJavaPackage(jspUri.substring(1, iSep)) : "";
         }
         return derivedPackageName;
     }
@@ -444,12 +442,11 @@ public class JspCompilationContext {
         }
 
         if (isTagFile()) {
-	    String tagName = tagInfo.getTagClassName();
+            String tagName = tagInfo.getTagClassName();
             javaPath = tagName.replace('.', '/') + ".java";
         } else {
-            javaPath = getServletPackageName().replace('.', '/') + '/' +
-                       getServletClassName() + ".java";
-	}
+            javaPath = getServletPackageName().replace('.', '/') + '/' + getServletClassName() + ".java";
+        }
         return javaPath;
     }
 
@@ -494,8 +491,7 @@ public class JspCompilationContext {
      * 'exposed' in the web application.
      */
     public String[] getTldLocation(String uri) throws JasperException {
-        String[] location =
-            getOptions().getTldLocationsCache().getLocation(uri);
+        String[] location = getOptions().getTldLocationsCache().getLocation(uri);
         return location;
     }
 
@@ -516,14 +512,10 @@ public class JspCompilationContext {
         } catch (final JasperException ex) {
             return ex;
         } catch (final IOException ioe) {
-            final JasperException je = new JasperException(
-                    Localizer.getMessage("jsp.error.unable.compile"),
-                    ioe);
+            final JasperException je = new JasperException(Localizer.getMessage("jsp.error.unable.compile"), ioe);
             return je;
         } catch (final Exception ex) {
-            JasperException je = new JasperException(
-                    Localizer.getMessage("jsp.error.unable.compile"),
-                    ex);
+            JasperException je = new JasperException(Localizer.getMessage("jsp.error.unable.compile"), ex);
             return je;
         } finally {
             c.clean();
@@ -544,18 +536,15 @@ public class JspCompilationContext {
         return name;
     }
 
-    public Class<?> load()
-    throws JasperException {
+    public Class<?> load() throws JasperException {
         try {
             final String name = this.getClassName();
             final Class<?> servletClass = getClassLoader().loadClass(name);
             return servletClass;
         } catch (ClassNotFoundException cex) {
-            throw new JasperException(Localizer.getMessage("jsp.error.unable.load"),
-                                      cex);
+            throw new JasperException(Localizer.getMessage("jsp.error.unable.load"), cex);
         } catch (Exception ex) {
-            throw new JasperException(Localizer.getMessage("jsp.error.unable.compile"),
-                                      ex);
+            throw new JasperException(Localizer.getMessage("jsp.error.unable.compile"), ex);
         }
     }
 
@@ -572,12 +561,12 @@ public class JspCompilationContext {
     private void createOutputDir() {
         String path = null;
         if (isTagFile()) {
-	        String tagName = tagInfo.getTagClassName();
+            String tagName = tagInfo.getTagClassName();
             path = tagName.replace('.', '/');
-	        path = path.substring(0, path.lastIndexOf('/'));
+            path = path.substring(0, path.lastIndexOf('/'));
         } else {
             path = getServletPackageName().replace('.', '/');
-	    }
+        }
 
         // Append servlet or tag handler path to scratch dir
         outputDir = options.getScratchDir() + File.separator + path + File.separator;
@@ -587,67 +576,62 @@ public class JspCompilationContext {
     }
 
     private static final boolean isPathSeparator(char c) {
-       return (c == '/' || c == '\\');
+        return (c == '/' || c == '\\');
     }
 
     private static final String canonicalURI(String s) {
-       if (s == null) return null;
-       StringBuilder result = new StringBuilder();
-       final int len = s.length();
-       int pos = 0;
-       while (pos < len) {
-           char c = s.charAt(pos);
-           if ( isPathSeparator(c) ) {
-               /*
-                * multiple path separators.
-                * 'foo///bar' -> 'foo/bar'
-                */
-               while (pos+1 < len && isPathSeparator(s.charAt(pos+1))) {
-                   ++pos;
-               }
+        if (s == null) return null;
+        StringBuilder result = new StringBuilder();
+        final int len = s.length();
+        int pos = 0;
+        while (pos < len) {
+            char c = s.charAt(pos);
+            if (isPathSeparator(c)) {
+                /*
+                 * multiple path separators.
+                 * 'foo///bar' -> 'foo/bar'
+                 */
+                while (pos + 1 < len && isPathSeparator(s.charAt(pos + 1))) {
+                    ++pos;
+                }
 
-               if (pos+1 < len && s.charAt(pos+1) == '.') {
-                   /*
-                    * a single dot at the end of the path - we are done.
-                    */
-                   if (pos+2 >= len) break;
+                if (pos + 1 < len && s.charAt(pos + 1) == '.') {
+                    /*
+                     * a single dot at the end of the path - we are done.
+                     */
+                    if (pos + 2 >= len) break;
 
-                   switch (s.charAt(pos+2)) {
-                       /*
-                        * self directory in path
-                        * foo/./bar -> foo/bar
-                        */
-                   case '/':
-                   case '\\':
-                       pos += 2;
-                       continue;
+                    switch (s.charAt(pos + 2)) {
+                            /*
+                             * self directory in path
+                             * foo/./bar -> foo/bar
+                             */
+                        case '/':
+                        case '\\':
+                            pos += 2;
+                            continue;
 
-                       /*
-                        * two dots in a path: go back one hierarchy.
-                        * foo/bar/../baz -> foo/baz
-                        */
-                   case '.':
-                       // only if we have exactly _two_ dots.
-                       if (pos+3 < len && isPathSeparator(s.charAt(pos+3))) {
-                           pos += 3;
-                           int separatorPos = result.length()-1;
-                           while (separatorPos >= 0 &&
-                                  ! isPathSeparator(result
-                                                    .charAt(separatorPos))) {
-                               --separatorPos;
-                           }
-                           if (separatorPos >= 0)
-                               result.setLength(separatorPos);
-                           continue;
-                       }
-                   }
-               }
-           }
-           result.append(c);
-           ++pos;
-       }
-       return result.toString();
+                            /*
+                             * two dots in a path: go back one hierarchy.
+                             * foo/bar/../baz -> foo/baz
+                             */
+                        case '.':
+                            // only if we have exactly _two_ dots.
+                            if (pos + 3 < len && isPathSeparator(s.charAt(pos + 3))) {
+                                pos += 3;
+                                int separatorPos = result.length() - 1;
+                                while (separatorPos >= 0 && !isPathSeparator(result.charAt(separatorPos))) {
+                                    --separatorPos;
+                                }
+                                if (separatorPos >= 0) result.setLength(separatorPos);
+                                continue;
+                            }
+                    }
+                }
+            }
+            result.append(c);
+            ++pos;
+        }
+        return result.toString();
     }
-
 }
-

@@ -1,20 +1,21 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
 package org.apache.sling.scripting.jsp.jasper.compiler;
 
 import java.io.BufferedReader;
@@ -47,8 +48,7 @@ public class JDTCompiler extends org.apache.sling.scripting.jsp.jasper.compiler.
      * Compile the servlet from .java file to .class file
      */
     @Override
-    protected void generateClass(String[] smap)
-        throws FileNotFoundException, JasperException, Exception {
+    protected void generateClass(String[] smap) throws FileNotFoundException, JasperException, Exception {
 
         long t1 = 0;
         if (log.isDebugEnabled()) {
@@ -58,8 +58,7 @@ public class JDTCompiler extends org.apache.sling.scripting.jsp.jasper.compiler.
         final String sourceFile = ctxt.getServletJavaFileName();
         final String packageName = ctxt.getServletPackageName();
         final String targetClassName =
-            ((packageName.length() != 0) ? (packageName + ".") : "")
-                    + ctxt.getServletClassName();
+                ((packageName.length() != 0) ? (packageName + ".") : "") + ctxt.getServletClassName();
         final CompilationUnit unit = new CompilationUnitWithSource() {
 
             /**
@@ -80,8 +79,8 @@ public class JDTCompiler extends org.apache.sling.scripting.jsp.jasper.compiler.
              * @see org.apache.sling.commons.compiler.CompilationUnit#getSource()
              */
             public Reader getSource() throws IOException {
-                return new BufferedReader(new InputStreamReader(ctxt.getInputStream(sourceFile),
-                                ctxt.getOptions().getJavaEncoding()));
+                return new BufferedReader(new InputStreamReader(
+                        ctxt.getInputStream(sourceFile), ctxt.getOptions().getJavaEncoding()));
             }
 
             /**
@@ -93,7 +92,9 @@ public class JDTCompiler extends org.apache.sling.scripting.jsp.jasper.compiler.
         };
 
         final Options options = new Options();
-        options.put(Options.KEY_CLASS_LOADER_WRITER, ctxt.getRuntimeContext().getIOProvider().getClassLoaderWriter());
+        options.put(
+                Options.KEY_CLASS_LOADER_WRITER,
+                ctxt.getRuntimeContext().getIOProvider().getClassLoaderWriter());
         options.put(Options.KEY_GENERATE_DEBUG_INFO, ctxt.getOptions().getClassDebugInfo());
 
         // Source JVM
@@ -113,14 +114,17 @@ public class JDTCompiler extends org.apache.sling.scripting.jsp.jasper.compiler.
         }
 
         final ArrayList<JavacErrorDetail> problemList = new ArrayList<JavacErrorDetail>();
-        final CompilationResult result = this.ctxt.getRuntimeContext().getIOProvider().getJavaCompiler().compile(new CompilationUnit[] {unit}, options);
-        if ( result.getErrors() != null ) {
-            for(final CompilerMessage cm : result.getErrors() ) {
+        final CompilationResult result = this.ctxt
+                .getRuntimeContext()
+                .getIOProvider()
+                .getJavaCompiler()
+                .compile(new CompilationUnit[] {unit}, options);
+        if (result.getErrors() != null) {
+            for (final CompilerMessage cm : result.getErrors()) {
                 final String name = cm.getFile();
                 try {
-                    problemList.add(ErrorDispatcher.createJavacError
-                            (name, pageNodes, new StringBuffer(cm.getMessage()),
-                                    cm.getLine(), ctxt));
+                    problemList.add(ErrorDispatcher.createJavacError(
+                            name, pageNodes, new StringBuffer(cm.getMessage()), cm.getLine(), ctxt));
                 } catch (JasperException e) {
                     log.error("Error visiting node", e);
                 }
@@ -132,15 +136,13 @@ public class JDTCompiler extends org.apache.sling.scripting.jsp.jasper.compiler.
         }
 
         if (!problemList.isEmpty()) {
-            JavacErrorDetail[] jeds =
-                problemList.toArray(new JavacErrorDetail[0]);
+            JavacErrorDetail[] jeds = problemList.toArray(new JavacErrorDetail[0]);
             errDispatcher.javacError(jeds);
         }
 
-        if( log.isDebugEnabled() ) {
-            long t2=System.currentTimeMillis();
-            log.debug("Compiled " + ctxt.getServletJavaFileName() + " "
-                      + (t2-t1) + "ms");
+        if (log.isDebugEnabled()) {
+            long t2 = System.currentTimeMillis();
+            log.debug("Compiled " + ctxt.getServletJavaFileName() + " " + (t2 - t1) + "ms");
         }
 
         if (ctxt.isPrototypeMode()) {
@@ -148,11 +150,8 @@ public class JDTCompiler extends org.apache.sling.scripting.jsp.jasper.compiler.
         }
 
         // JSR45 Support
-        if (! this.ctxt.getOptions().isSmapSuppressed()) {
+        if (!this.ctxt.getOptions().isSmapSuppressed()) {
             SmapUtil.installSmap(getCompilationContext(), smap);
         }
-
     }
-
-
 }

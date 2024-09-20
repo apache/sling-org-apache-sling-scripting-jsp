@@ -18,12 +18,12 @@
  */
 package org.apache.sling.scripting.jsp;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
 
 import org.osgi.framework.Constants;
 
@@ -68,7 +68,7 @@ class JspServletConfig implements ServletConfig {
      */
     public String getConfigKey() {
         final StringBuilder sb = new StringBuilder();
-        for(final Map.Entry<String, String> entry : this.properties.entrySet() ) {
+        for (final Map.Entry<String, String> entry : this.properties.entrySet()) {
             sb.append(entry.getKey());
             sb.append('=');
             sb.append(entry.getValue());

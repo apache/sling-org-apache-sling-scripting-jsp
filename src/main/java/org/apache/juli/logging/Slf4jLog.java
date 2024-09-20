@@ -100,6 +100,4 @@ public class Slf4jLog implements Log {
     public void warn(Object message) {
         delegatee.warn(message.toString());
     }
-    
-    
 }

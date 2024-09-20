@@ -1,18 +1,20 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.sling.scripting.jsp;
 
@@ -41,8 +43,7 @@ import org.osgi.framework.ServiceRegistration;
 /**
  * The <code>SlingTldLocationsCache</code> TODO
  */
-public class SlingTldLocationsCache
-    extends TldLocationsCache implements BundleListener {
+public class SlingTldLocationsCache extends TldLocationsCache implements BundleListener {
 
     private static final String TLD_SCHEME = "tld:";
 
@@ -57,7 +58,7 @@ public class SlingTldLocationsCache
         context.addBundleListener(this);
         final Bundle[] bundles = context.getBundles();
         for (int i = 0; i < bundles.length; i++) {
-            if (bundles[i].getState() == Bundle.RESOLVED || bundles[i].getState() == Bundle.ACTIVE ) {
+            if (bundles[i].getState() == Bundle.RESOLVED || bundles[i].getState() == Bundle.ACTIVE) {
                 addBundle(bundles[i]);
             }
         }
@@ -66,9 +67,7 @@ public class SlingTldLocationsCache
         tldConfigPrinterProperties.put("felix.webconsole.label", "jsptaglibs");
         tldConfigPrinterProperties.put("felix.webconsole.title", "JSP Taglibs");
         tldConfigPrinterProperties.put("felix.webconsole.configprinter.modes", "always");
-        this.serviceRegistration = context.registerService(Object.class.getName(),
-            this, tldConfigPrinterProperties);
-
+        this.serviceRegistration = context.registerService(Object.class.getName(), this, tldConfigPrinterProperties);
     }
 
     public void deactivate(final BundleContext context) {
@@ -83,9 +82,9 @@ public class SlingTldLocationsCache
 
     @Override
     public void bundleChanged(final BundleEvent event) {
-        if ( event.getType() == BundleEvent.RESOLVED ) {
+        if (event.getType() == BundleEvent.RESOLVED) {
             this.addBundle(event.getBundle());
-        } else if ( event.getType() == BundleEvent.UNRESOLVED ) {
+        } else if (event.getType() == BundleEvent.UNRESOLVED) {
             this.removeBundle(event.getBundle());
         }
     }
@@ -113,8 +112,8 @@ public class SlingTldLocationsCache
     public String[] getLocation(final String uri) throws JasperException {
         synchronized (tldLocations) {
             final TldLocationEntry entry = tldLocations.get(uri);
-            if ( entry != null ) {
-                return new String[] { TLD_SCHEME + uri, entry.getTldURL().toString() };
+            if (entry != null) {
+                return new String[] {TLD_SCHEME + uri, entry.getTldURL().toString()};
             }
         }
 
@@ -142,8 +141,9 @@ public class SlingTldLocationsCache
 
     private void removeBundle(final Bundle bundle) {
         synchronized (tldLocations) {
-            final Iterator<Map.Entry<String, TldLocationEntry>> i = tldLocations.entrySet().iterator();
-            while ( i.hasNext() ) {
+            final Iterator<Map.Entry<String, TldLocationEntry>> i =
+                    tldLocations.entrySet().iterator();
+            while (i.hasNext()) {
                 final Map.Entry<String, TldLocationEntry> entry = i.next();
                 if (entry.getValue().getBundleId() == bundle.getBundleId()) {
                     i.remove();
@@ -162,8 +162,7 @@ public class SlingTldLocationsCache
             stream = resource.openStream();
 
             // Parse the tag library descriptor at the specified resource path
-            TreeNode tld = new ParserUtils().parseXMLDocument(
-                resource.toString(), stream);
+            TreeNode tld = new ParserUtils().parseXMLDocument(resource.toString(), stream);
             TreeNode uri = tld.findChild("uri");
             if (uri != null) {
                 String body = uri.getBody();
@@ -205,7 +204,6 @@ public class SlingTldLocationsCache
             pw.printf("  %s - %s\n", entry.getKey(), entry.getValue());
         }
     }
-
 
     private static final class TldLocationEntry {
         private final long bundleId;

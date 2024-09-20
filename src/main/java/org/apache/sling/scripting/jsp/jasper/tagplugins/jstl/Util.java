@@ -1,29 +1,22 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
-
 package org.apache.sling.scripting.jsp.jasper.tagplugins.jstl;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.util.Locale;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.WriteListener;
@@ -34,20 +27,24 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.PageContext;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.util.Locale;
+
 import org.apache.sling.scripting.jsp.jasper.Constants;
 
 /**
  * Util contains some often used consts, static methods and embedded class
  * to support the JSTL tag plugin.
  */
-
 public class Util {
 
-    public static final String VALID_SCHEME_CHAR =
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+.-";
+    public static final String VALID_SCHEME_CHAR = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+.-";
 
-    public static final String DEFAULT_ENCODING =
-        "ISO-8859-1";
+    public static final String DEFAULT_ENCODING = "ISO-8859-1";
 
     public static final int HIGHEST_SPECIAL = '>';
 
@@ -74,14 +71,14 @@ public class Util {
      *
      * taken from org.apache.taglibs.standard.tag.common.core.Util
      */
-    public static int getScope(String scope){
+    public static int getScope(String scope) {
         int ret = PageContext.PAGE_SCOPE;
 
-        if("request".equalsIgnoreCase(scope)){
+        if ("request".equalsIgnoreCase(scope)) {
             ret = PageContext.REQUEST_SCOPE;
-        }else if("session".equalsIgnoreCase(scope)){
+        } else if ("session".equalsIgnoreCase(scope)) {
             ret = PageContext.SESSION_SCOPE;
-        }else if("application".equalsIgnoreCase(scope)){
+        } else if ("application".equalsIgnoreCase(scope)) {
             ret = PageContext.APPLICATION_SCOPE;
         }
 
@@ -93,18 +90,18 @@ public class Util {
      * <tt>false</tt> otherwise.
      * taken from org.apache.taglibs.standard.tag.common.core.ImportSupport
      */
-    public static boolean isAbsoluteUrl(String url){
-        if(url == null){
+    public static boolean isAbsoluteUrl(String url) {
+        if (url == null) {
             return false;
         }
 
         int colonPos = url.indexOf(":");
-        if(colonPos == -1){
+        if (colonPos == -1) {
             return false;
         }
 
-        for(int i=0;i<colonPos;i++){
-            if(VALID_SCHEME_CHAR.indexOf(url.charAt(i)) == -1){
+        for (int i = 0; i < colonPos; i++) {
+            if (VALID_SCHEME_CHAR.indexOf(url.charAt(i)) == -1) {
                 return false;
             }
         }
@@ -155,15 +152,13 @@ public class Util {
         int sessionStart;
         while ((sessionStart = u.toString().indexOf(";" + Constants.SESSION_PARAMETER_NAME + "=")) != -1) {
             int sessionEnd = u.toString().indexOf(";", sessionStart + 1);
-            if (sessionEnd == -1)
-                sessionEnd = u.toString().indexOf("?", sessionStart + 1);
-            if (sessionEnd == -1) 				// still
-                sessionEnd = u.length();
+            if (sessionEnd == -1) sessionEnd = u.toString().indexOf("?", sessionStart + 1);
+            if (sessionEnd == -1) // still
+            sessionEnd = u.length();
             u.delete(sessionStart, sessionEnd);
         }
         return u.toString();
     }
-
 
     /**
      * Performs the following substring replacements
@@ -196,7 +191,7 @@ public class Util {
                     }
                     // add unescaped portion
                     if (start < i) {
-                        escapedBuffer.append(arrayBuffer,start,i-start);
+                        escapedBuffer.append(arrayBuffer, start, i - start);
                     }
                     start = i + 1;
                     // add escaped xml
@@ -210,7 +205,7 @@ public class Util {
         }
         // add rest of unescaped portion
         if (start < length) {
-            escapedBuffer.append(arrayBuffer,start,length-start);
+            escapedBuffer.append(arrayBuffer, start, length - start);
         }
         return escapedBuffer.toString();
     }
@@ -218,25 +213,19 @@ public class Util {
     /** Utility methods
      * taken from org.apache.taglibs.standard.tag.common.core.UrlSupport
      */
-    public static String resolveUrl(
-            String url, String context, PageContext pageContext)
-    throws JspException {
+    public static String resolveUrl(String url, String context, PageContext pageContext) throws JspException {
         // don't touch absolute URLs
-        if (isAbsoluteUrl(url))
-            return url;
+        if (isAbsoluteUrl(url)) return url;
 
         // normalize relative URLs against a context root
-        HttpServletRequest request =
-            (HttpServletRequest) pageContext.getRequest();
+        HttpServletRequest request = (HttpServletRequest) pageContext.getRequest();
         if (context == null) {
-            if (url.startsWith("/"))
-                return (request.getContextPath() + url);
-            else
-                return url;
+            if (url.startsWith("/")) return (request.getContextPath() + url);
+            else return url;
         } else {
             if (!context.startsWith("/") || !url.startsWith("/")) {
                 throw new JspTagException(
-                "In URL tags, when the \"context\" attribute is specified, values of both \"context\" and \"url\" must start with \"/\".");
+                        "In URL tags, when the \"context\" attribute is specified, values of both \"context\" and \"url\" must start with \"/\".");
             }
             if (context.equals("/")) {
                 // Don't produce string starting with '//', many
@@ -252,7 +241,7 @@ public class Util {
     /** Wraps responses to allow us to retrieve results as Strings.
      * mainly taken from org.apache.taglibs.standard.tag.common.core.importSupport
      */
-    public static class ImportResponseWrapper extends HttpServletResponseWrapper{
+    public static class ImportResponseWrapper extends HttpServletResponseWrapper {
 
         private StringWriter sw = new StringWriter();
         private ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -285,8 +274,8 @@ public class Util {
         @Override
         public PrintWriter getWriter() {
             if (isStreamUsed)
-                throw new IllegalStateException("Unexpected internal error during &lt;import&gt: " +
-                "Target servlet called getWriter(), then getOutputStream()");
+                throw new IllegalStateException("Unexpected internal error during &lt;import&gt: "
+                        + "Target servlet called getWriter(), then getOutputStream()");
             isWriterUsed = true;
             return new PrintWriter(sw);
         }
@@ -294,8 +283,8 @@ public class Util {
         @Override
         public ServletOutputStream getOutputStream() {
             if (isWriterUsed)
-                throw new IllegalStateException("Unexpected internal error during &lt;import&gt: " +
-                "Target servlet called getOutputStream(), then getWriter()");
+                throw new IllegalStateException("Unexpected internal error during &lt;import&gt: "
+                        + "Target servlet called getOutputStream(), then getWriter()");
             isStreamUsed = true;
             return sos;
         }
@@ -322,25 +311,20 @@ public class Util {
             return status;
         }
 
-        public String getCharEncoding(){
+        public String getCharEncoding() {
             return this.charEncoding;
         }
 
-        public void setCharEncoding(String ce){
+        public void setCharEncoding(String ce) {
             this.charEncoding = ce;
         }
 
         public String getString() throws UnsupportedEncodingException {
-            if (isWriterUsed)
-                return sw.toString();
+            if (isWriterUsed) return sw.toString();
             else if (isStreamUsed) {
-                if (this.charEncoding != null && !this.charEncoding.equals(""))
-                    return bos.toString(charEncoding);
-                else
-                    return bos.toString("ISO-8859-1");
-            } else
-                return "";		// target didn't write anything
+                if (this.charEncoding != null && !this.charEncoding.equals("")) return bos.toString(charEncoding);
+                else return bos.toString("ISO-8859-1");
+            } else return ""; // target didn't write anything
         }
     }
-
 }

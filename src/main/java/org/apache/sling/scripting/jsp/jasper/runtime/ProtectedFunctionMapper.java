@@ -1,21 +1,24 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
 package org.apache.sling.scripting.jsp.jasper.runtime;
+
+import javax.servlet.jsp.el.FunctionMapper;
 
 import java.lang.reflect.Method;
 import java.security.AccessController;
@@ -23,8 +26,6 @@ import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.HashMap;
-
-import javax.servlet.jsp.el.FunctionMapper;
 
 import org.apache.sling.scripting.jsp.jasper.security.SecurityUtil;
 
@@ -35,8 +36,7 @@ import org.apache.sling.scripting.jsp.jasper.security.SecurityUtil;
  * @author Mark Roth
  * @author Kin-man Chung
  */
-public final class ProtectedFunctionMapper extends javax.el.FunctionMapper
-        implements FunctionMapper {
+public final class ProtectedFunctionMapper extends javax.el.FunctionMapper implements FunctionMapper {
 
     /**
      * Maps "prefix:name" to java.lang.Method objects.
@@ -51,8 +51,7 @@ public final class ProtectedFunctionMapper extends javax.el.FunctionMapper
     /**
      * Constructor has protected access.
      */
-    private ProtectedFunctionMapper() {
-    }
+    private ProtectedFunctionMapper() {}
 
     /**
      * Generated Servlet and Tag Handler implementations call this method to
@@ -65,13 +64,12 @@ public final class ProtectedFunctionMapper extends javax.el.FunctionMapper
     public static ProtectedFunctionMapper getInstance() {
         ProtectedFunctionMapper funcMapper;
         if (SecurityUtil.isPackageProtectionEnabled()) {
-            funcMapper = AccessController
-                    .doPrivileged(new PrivilegedAction<ProtectedFunctionMapper>() {
-                        @Override
-                        public ProtectedFunctionMapper run() {
-                            return new ProtectedFunctionMapper();
-                        }
-                    });
+            funcMapper = AccessController.doPrivileged(new PrivilegedAction<ProtectedFunctionMapper>() {
+                @Override
+                public ProtectedFunctionMapper run() {
+                    return new ProtectedFunctionMapper();
+                }
+            });
         } else {
             funcMapper = new ProtectedFunctionMapper();
         }
@@ -94,31 +92,26 @@ public final class ProtectedFunctionMapper extends javax.el.FunctionMapper
      * @throws RuntimeException
      *             if no method with the given signature could be found.
      */
-    public void mapFunction(String fnQName, final Class<?> c,
-            final String methodName, final Class<?>[] args) {
+    public void mapFunction(String fnQName, final Class<?> c, final String methodName, final Class<?>[] args) {
         java.lang.reflect.Method method;
         if (SecurityUtil.isPackageProtectionEnabled()) {
             try {
-                method = AccessController
-                        .doPrivileged(new PrivilegedExceptionAction<Method>() {
+                method = AccessController.doPrivileged(new PrivilegedExceptionAction<Method>() {
 
-                            @Override
-                            public Method run() throws Exception {
-                                return c.getDeclaredMethod(methodName, args);
-                            }
-                        });
+                    @Override
+                    public Method run() throws Exception {
+                        return c.getDeclaredMethod(methodName, args);
+                    }
+                });
             } catch (PrivilegedActionException ex) {
-                throw new RuntimeException(
-                        "Invalid function mapping - no such method: "
-                                + ex.getException().getMessage());
+                throw new RuntimeException("Invalid function mapping - no such method: "
+                        + ex.getException().getMessage());
             }
         } else {
             try {
                 method = c.getDeclaredMethod(methodName, args);
             } catch (NoSuchMethodException e) {
-                throw new RuntimeException(
-                        "Invalid function mapping - no such method: "
-                                + e.getMessage());
+                throw new RuntimeException("Invalid function mapping - no such method: " + e.getMessage());
             }
         }
 
@@ -141,41 +134,36 @@ public final class ProtectedFunctionMapper extends javax.el.FunctionMapper
      * @throws RuntimeException
      *             if no method with the given signature could be found.
      */
-    public static ProtectedFunctionMapper getMapForFunction(String fnQName,
-            final Class<?> c, final String methodName, final Class<?>[] args) {
+    public static ProtectedFunctionMapper getMapForFunction(
+            String fnQName, final Class<?> c, final String methodName, final Class<?>[] args) {
         java.lang.reflect.Method method;
         ProtectedFunctionMapper funcMapper;
         if (SecurityUtil.isPackageProtectionEnabled()) {
-            funcMapper = AccessController
-                    .doPrivileged(new PrivilegedAction<ProtectedFunctionMapper>() {
-                        @Override
-                        public ProtectedFunctionMapper run() {
-                            return new ProtectedFunctionMapper();
-                        }
-                    });
+            funcMapper = AccessController.doPrivileged(new PrivilegedAction<ProtectedFunctionMapper>() {
+                @Override
+                public ProtectedFunctionMapper run() {
+                    return new ProtectedFunctionMapper();
+                }
+            });
 
             try {
-                method = AccessController
-                        .doPrivileged(new PrivilegedExceptionAction<Method>() {
+                method = AccessController.doPrivileged(new PrivilegedExceptionAction<Method>() {
 
-                            @Override
-                            public Method run() throws Exception {
-                                return c.getDeclaredMethod(methodName, args);
-                            }
-                        });
+                    @Override
+                    public Method run() throws Exception {
+                        return c.getDeclaredMethod(methodName, args);
+                    }
+                });
             } catch (PrivilegedActionException ex) {
-                throw new RuntimeException(
-                        "Invalid function mapping - no such method: "
-                                + ex.getException().getMessage());
+                throw new RuntimeException("Invalid function mapping - no such method: "
+                        + ex.getException().getMessage());
             }
         } else {
             funcMapper = new ProtectedFunctionMapper();
             try {
                 method = c.getDeclaredMethod(methodName, args);
             } catch (NoSuchMethodException e) {
-                throw new RuntimeException(
-                        "Invalid function mapping - no such method: "
-                                + e.getMessage());
+                throw new RuntimeException("Invalid function mapping - no such method: " + e.getMessage());
             }
         }
         funcMapper.theMethod = method;

@@ -1,20 +1,21 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
 package org.apache.sling.scripting.jsp.jasper.compiler;
 
 import java.io.BufferedReader;
@@ -49,9 +50,7 @@ public class JavacErrorDetail {
      * @param javaLineNum The compilation error line number
      * @param errMsg The compilation error message
      */
-    public JavacErrorDetail(String javaFileName,
-                            int javaLineNum,
-                            StringBuffer errMsg) {
+    public JavacErrorDetail(String javaFileName, int javaLineNum, StringBuffer errMsg) {
 
         this.javaFileName = javaFileName;
         this.javaLineNum = javaLineNum;
@@ -71,17 +70,14 @@ public class JavacErrorDetail {
      * responsible for the compilation error
      * @param errMsg The compilation error message
      */
-    public JavacErrorDetail(String javaFileName,
-                            int javaLineNum,
-                            String jspFileName,
-                            int jspBeginLineNum,
-                            StringBuffer errMsg) {
+    public JavacErrorDetail(
+            String javaFileName, int javaLineNum, String jspFileName, int jspBeginLineNum, StringBuffer errMsg) {
 
-        this(javaFileName, javaLineNum, jspFileName, jspBeginLineNum, errMsg,
-                null);
+        this(javaFileName, javaLineNum, jspFileName, jspBeginLineNum, errMsg, null);
     }
 
-    public JavacErrorDetail(String javaFileName,
+    public JavacErrorDetail(
+            String javaFileName,
             int javaLineNum,
             String jspFileName,
             int jspBeginLineNum,
@@ -107,14 +103,13 @@ public class JavacErrorDetail {
                 // If the line contains the opening of a multi-line scriptlet
                 // block, then the JSP line number we got back is probably
                 // faulty.  Scan forward to match the java line...
-                if (jspLines[jspBeginLineNum-1].lastIndexOf("<%") >
-                    jspLines[jspBeginLineNum-1].lastIndexOf("%>")) {
-                    String javaLine = javaLines[javaLineNum-1].trim();
+                if (jspLines[jspBeginLineNum - 1].lastIndexOf("<%") > jspLines[jspBeginLineNum - 1].lastIndexOf("%>")) {
+                    String javaLine = javaLines[javaLineNum - 1].trim();
 
-                    for (int i=jspBeginLineNum-1; i<jspLines.length; i++) {
+                    for (int i = jspBeginLineNum - 1; i < jspLines.length; i++) {
                         if (jspLines[i].indexOf(javaLine) != -1) {
                             // Update jsp line number
-                            this.jspBeginLineNum = i+1;
+                            this.jspBeginLineNum = i + 1;
                             break;
                         }
                     }
@@ -122,12 +117,11 @@ public class JavacErrorDetail {
 
                 // copy out a fragment of JSP to display to the user
                 StringBuffer fragment = new StringBuffer(1024);
-                int startIndex = Math.max(0, this.jspBeginLineNum-1-3);
-                int endIndex = Math.min(
-                        jspLines.length-1, this.jspBeginLineNum-1+3);
+                int startIndex = Math.max(0, this.jspBeginLineNum - 1 - 3);
+                int endIndex = Math.min(jspLines.length - 1, this.jspBeginLineNum - 1 + 3);
 
-                for (int i=startIndex;i<=endIndex; ++i) {
-                    fragment.append(i+1);
+                for (int i = startIndex; i <= endIndex; ++i) {
+                    fragment.append(i + 1);
                     fragment.append(": ");
                     fragment.append(jspLines[i]);
                     fragment.append("\n");
@@ -222,10 +216,10 @@ public class JavacErrorDetail {
         List lines = new ArrayList();
         String line;
 
-        while ( (line = reader.readLine()) != null ) {
+        while ((line = reader.readLine()) != null) {
             lines.add(line);
         }
 
-        return (String[]) lines.toArray( new String[lines.size()] );
+        return (String[]) lines.toArray(new String[lines.size()]);
     }
 }

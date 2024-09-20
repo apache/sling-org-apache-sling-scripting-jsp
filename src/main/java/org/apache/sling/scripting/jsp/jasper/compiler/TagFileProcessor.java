@@ -1,28 +1,22 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
 package org.apache.sling.scripting.jsp.jasper.compiler;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Vector;
 
 import javax.el.MethodExpression;
 import javax.el.ValueExpression;
@@ -33,6 +27,13 @@ import javax.servlet.jsp.tagext.TagInfo;
 import javax.servlet.jsp.tagext.TagLibraryInfo;
 import javax.servlet.jsp.tagext.TagVariableInfo;
 import javax.servlet.jsp.tagext.VariableInfo;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 import org.apache.sling.scripting.jsp.jasper.JasperException;
 import org.apache.sling.scripting.jsp.jasper.JspCompilationContext;
@@ -45,7 +46,6 @@ import org.apache.sling.scripting.jsp.jasper.servlet.JspServletWrapper;
  *
  * @author Kin-man Chung
  */
-
 class TagFileProcessor {
 
     private Vector<Compiler> tempVector;
@@ -56,40 +56,43 @@ class TagFileProcessor {
     private static class TagFileDirectiveVisitor extends Node.Visitor {
 
         private static final JspUtil.ValidAttribute[] tagDirectiveAttrs = {
-                new JspUtil.ValidAttribute("display-name"),
-                new JspUtil.ValidAttribute("body-content"),
-                new JspUtil.ValidAttribute("dynamic-attributes"),
-                new JspUtil.ValidAttribute("small-icon"),
-                new JspUtil.ValidAttribute("large-icon"),
-                new JspUtil.ValidAttribute("description"),
-                new JspUtil.ValidAttribute("example"),
-                new JspUtil.ValidAttribute("pageEncoding"),
-                new JspUtil.ValidAttribute("language"),
-                new JspUtil.ValidAttribute("import"),
-                new JspUtil.ValidAttribute("deferredSyntaxAllowedAsLiteral"), // JSP 2.1
-                new JspUtil.ValidAttribute("trimDirectiveWhitespaces"), // JSP 2.1
-                new JspUtil.ValidAttribute("isELIgnored") };
+            new JspUtil.ValidAttribute("display-name"),
+            new JspUtil.ValidAttribute("body-content"),
+            new JspUtil.ValidAttribute("dynamic-attributes"),
+            new JspUtil.ValidAttribute("small-icon"),
+            new JspUtil.ValidAttribute("large-icon"),
+            new JspUtil.ValidAttribute("description"),
+            new JspUtil.ValidAttribute("example"),
+            new JspUtil.ValidAttribute("pageEncoding"),
+            new JspUtil.ValidAttribute("language"),
+            new JspUtil.ValidAttribute("import"),
+            new JspUtil.ValidAttribute("deferredSyntaxAllowedAsLiteral"), // JSP 2.1
+            new JspUtil.ValidAttribute("trimDirectiveWhitespaces"), // JSP 2.1
+            new JspUtil.ValidAttribute("isELIgnored")
+        };
 
         private static final JspUtil.ValidAttribute[] attributeDirectiveAttrs = {
-                new JspUtil.ValidAttribute("name", true),
-                new JspUtil.ValidAttribute("required"),
-                new JspUtil.ValidAttribute("fragment"),
-                new JspUtil.ValidAttribute("rtexprvalue"),
-                new JspUtil.ValidAttribute("type"),
-                new JspUtil.ValidAttribute("deferredValue"),            // JSP 2.1
-                new JspUtil.ValidAttribute("deferredValueType"),        // JSP 2.1
-                new JspUtil.ValidAttribute("deferredMethod"),           // JSP 2
-                new JspUtil.ValidAttribute("deferredMethodSignature"),  // JSP 21
-                new JspUtil.ValidAttribute("description") };
+            new JspUtil.ValidAttribute("name", true),
+            new JspUtil.ValidAttribute("required"),
+            new JspUtil.ValidAttribute("fragment"),
+            new JspUtil.ValidAttribute("rtexprvalue"),
+            new JspUtil.ValidAttribute("type"),
+            new JspUtil.ValidAttribute("deferredValue"), // JSP 2.1
+            new JspUtil.ValidAttribute("deferredValueType"), // JSP 2.1
+            new JspUtil.ValidAttribute("deferredMethod"), // JSP 2
+            new JspUtil.ValidAttribute("deferredMethodSignature"), // JSP 21
+            new JspUtil.ValidAttribute("description")
+        };
 
         private static final JspUtil.ValidAttribute[] variableDirectiveAttrs = {
-                new JspUtil.ValidAttribute("name-given"),
-                new JspUtil.ValidAttribute("name-from-attribute"),
-                new JspUtil.ValidAttribute("alias"),
-                new JspUtil.ValidAttribute("variable-class"),
-                new JspUtil.ValidAttribute("scope"),
-                new JspUtil.ValidAttribute("declare"),
-                new JspUtil.ValidAttribute("description") };
+            new JspUtil.ValidAttribute("name-given"),
+            new JspUtil.ValidAttribute("name-from-attribute"),
+            new JspUtil.ValidAttribute("alias"),
+            new JspUtil.ValidAttribute("variable-class"),
+            new JspUtil.ValidAttribute("scope"),
+            new JspUtil.ValidAttribute("declare"),
+            new JspUtil.ValidAttribute("description")
+        };
 
         private ErrorDispatcher err;
 
@@ -133,8 +136,7 @@ class TagFileProcessor {
 
         private HashMap nameFromTable = new HashMap();
 
-        public TagFileDirectiveVisitor(Compiler compiler,
-                TagLibraryInfo tagLibInfo, String name, String path) {
+        public TagFileDirectiveVisitor(Compiler compiler, TagLibraryInfo tagLibInfo, String name, String path) {
             err = compiler.getErrorDispatcher();
             this.tagLibInfo = tagLibInfo;
             this.name = name;
@@ -150,17 +152,12 @@ class TagFileProcessor {
 
             bodycontent = checkConflict(n, bodycontent, "body-content");
             if (bodycontent != null
-                    && !bodycontent
-                            .equalsIgnoreCase(TagInfo.BODY_CONTENT_EMPTY)
-                    && !bodycontent
-                            .equalsIgnoreCase(TagInfo.BODY_CONTENT_TAG_DEPENDENT)
-                    && !bodycontent
-                            .equalsIgnoreCase(TagInfo.BODY_CONTENT_SCRIPTLESS)) {
-                err.jspError(n, "jsp.error.tagdirective.badbodycontent",
-                        bodycontent);
+                    && !bodycontent.equalsIgnoreCase(TagInfo.BODY_CONTENT_EMPTY)
+                    && !bodycontent.equalsIgnoreCase(TagInfo.BODY_CONTENT_TAG_DEPENDENT)
+                    && !bodycontent.equalsIgnoreCase(TagInfo.BODY_CONTENT_SCRIPTLESS)) {
+                err.jspError(n, "jsp.error.tagdirective.badbodycontent", bodycontent);
             }
-            dynamicAttrsMapName = checkConflict(n, dynamicAttrsMapName,
-                    "dynamic-attributes");
+            dynamicAttrsMapName = checkConflict(n, dynamicAttrsMapName, "dynamic-attributes");
             if (dynamicAttrsMapName != null) {
                 checkUniqueName(dynamicAttrsMapName, TAG_DYNAMIC, n);
             }
@@ -171,15 +168,13 @@ class TagFileProcessor {
             example = checkConflict(n, example, "example");
         }
 
-        private String checkConflict(Node n, String oldAttrValue, String attr)
-                throws JasperException {
+        private String checkConflict(Node n, String oldAttrValue, String attr) throws JasperException {
 
             String result = oldAttrValue;
             String attrValue = n.getAttributeValue(attr);
             if (attrValue != null) {
                 if (oldAttrValue != null && !oldAttrValue.equals(attrValue)) {
-                    err.jspError(n, "jsp.error.tag.conflict.attr", attr,
-                            oldAttrValue, attrValue);
+                    err.jspError(n, "jsp.error.tag.conflict.attr", attr, oldAttrValue, attrValue);
                 }
                 result = attrValue;
             }
@@ -189,8 +184,7 @@ class TagFileProcessor {
         @Override
         public void visit(Node.AttributeDirective n) throws JasperException {
 
-            JspUtil.checkAttributes("Attribute directive", n,
-                    attributeDirectiveAttrs, err);
+            JspUtil.checkAttributes("Attribute directive", n, attributeDirectiveAttrs, err);
 
             // JSP 2.1 Table JSP.8-3
             // handle deferredValue and deferredValueType
@@ -223,8 +217,7 @@ class TagFileProcessor {
                 deferredMethodSpecified = true;
                 deferredMethod = JspUtil.booleanValue(deferredMethodString);
             }
-            String deferredMethodSignature = n
-                    .getAttributeValue("deferredMethodSignature");
+            String deferredMethodSignature = n.getAttributeValue("deferredMethodSignature");
             if (deferredMethodSignature != null) {
                 if (deferredMethodSpecified && !deferredMethod) {
                     err.jspError(n, "jsp.error.deferredmethodsignaturewithoutdeferredmethod");
@@ -240,15 +233,13 @@ class TagFileProcessor {
             }
 
             String attrName = n.getAttributeValue("name");
-            boolean required = JspUtil.booleanValue(n
-                    .getAttributeValue("required"));
+            boolean required = JspUtil.booleanValue(n.getAttributeValue("required"));
             boolean rtexprvalue = true;
             String rtexprvalueString = n.getAttributeValue("rtexprvalue");
             if (rtexprvalueString != null) {
                 rtexprvalue = JspUtil.booleanValue(rtexprvalueString);
             }
-            boolean fragment = JspUtil.booleanValue(n
-                    .getAttributeValue("fragment"));
+            boolean fragment = JspUtil.booleanValue(n.getAttributeValue("fragment"));
             String type = n.getAttributeValue("type");
             if (fragment) {
                 // type is fixed to "JspFragment" and a translation error
@@ -263,8 +254,7 @@ class TagFileProcessor {
                     err.jspError(n, "jsp.error.frgmentwithrtexprvalue");
                 }
             } else {
-                if (type == null)
-                    type = "java.lang.String";
+                if (type == null) type = "java.lang.String";
 
                 if (deferredValue) {
                     type = ValueExpression.class.getName();
@@ -274,14 +264,21 @@ class TagFileProcessor {
             }
 
             if (("2.0".equals(tagLibInfo.getRequiredVersion()) || ("1.2".equals(tagLibInfo.getRequiredVersion())))
-                    && (deferredMethodSpecified || deferredMethod
-                            || deferredValueSpecified || deferredValue)) {
+                    && (deferredMethodSpecified || deferredMethod || deferredValueSpecified || deferredValue)) {
                 err.jspError("jsp.error.invalid.version", path);
             }
 
-            TagAttributeInfo tagAttributeInfo = new TagAttributeInfo(attrName,
-                    required, type, rtexprvalue, fragment, null, deferredValue,
-                    deferredMethod, deferredValueType, deferredMethodSignature);
+            TagAttributeInfo tagAttributeInfo = new TagAttributeInfo(
+                    attrName,
+                    required,
+                    type,
+                    rtexprvalue,
+                    fragment,
+                    null,
+                    deferredValue,
+                    deferredMethod,
+                    deferredValueType,
+                    deferredMethodSignature);
             attributeVector.addElement(tagAttributeInfo);
             checkUniqueName(attrName, ATTR_NAME, n, tagAttributeInfo);
         }
@@ -289,12 +286,10 @@ class TagFileProcessor {
         @Override
         public void visit(Node.VariableDirective n) throws JasperException {
 
-            JspUtil.checkAttributes("Variable directive", n,
-                    variableDirectiveAttrs, err);
+            JspUtil.checkAttributes("Variable directive", n, variableDirectiveAttrs, err);
 
             String nameGiven = n.getAttributeValue("name-given");
-            String nameFromAttribute = n
-                    .getAttributeValue("name-from-attribute");
+            String nameFromAttribute = n.getAttributeValue("name-from-attribute");
             if (nameGiven == null && nameFromAttribute == null) {
                 err.jspError("jsp.error.variable.either.name");
             }
@@ -304,19 +299,16 @@ class TagFileProcessor {
             }
 
             String alias = n.getAttributeValue("alias");
-            if (nameFromAttribute != null && alias == null
-                    || nameFromAttribute == null && alias != null) {
+            if (nameFromAttribute != null && alias == null || nameFromAttribute == null && alias != null) {
                 err.jspError("jsp.error.variable.alias");
             }
 
             String className = n.getAttributeValue("variable-class");
-            if (className == null)
-                className = "java.lang.String";
+            if (className == null) className = "java.lang.String";
 
             String declareStr = n.getAttributeValue("declare");
             boolean declare = true;
-            if (declareStr != null)
-                declare = JspUtil.booleanValue(declareStr);
+            if (declareStr != null) declare = JspUtil.booleanValue(declareStr);
 
             int scope = VariableInfo.NESTED;
             String scopeStr = n.getAttributeValue("scope");
@@ -345,8 +337,7 @@ class TagFileProcessor {
                 checkUniqueName(nameGiven, VAR_NAME_GIVEN, n);
             }
 
-            variableVector.addElement(new TagVariableInfo(nameGiven,
-                    nameFromAttribute, className, declare, scope));
+            variableVector.addElement(new TagVariableInfo(nameGiven, nameFromAttribute, className, declare, scope));
         }
 
         /*
@@ -383,17 +374,24 @@ class TagFileProcessor {
 
             String tagClassName = JspUtil.getTagHandlerClassName(path, err);
 
-            TagVariableInfo[] tagVariableInfos = new TagVariableInfo[variableVector
-                    .size()];
+            TagVariableInfo[] tagVariableInfos = new TagVariableInfo[variableVector.size()];
             variableVector.copyInto(tagVariableInfos);
 
-            TagAttributeInfo[] tagAttributeInfo = new TagAttributeInfo[attributeVector
-                    .size()];
+            TagAttributeInfo[] tagAttributeInfo = new TagAttributeInfo[attributeVector.size()];
             attributeVector.copyInto(tagAttributeInfo);
 
-            return new JasperTagInfo(name, tagClassName, bodycontent,
-                    description, tagLibInfo, tei, tagAttributeInfo,
-                    displayName, smallIcon, largeIcon, tagVariableInfos,
+            return new JasperTagInfo(
+                    name,
+                    tagClassName,
+                    bodycontent,
+                    description,
+                    tagLibInfo,
+                    tei,
+                    tagAttributeInfo,
+                    displayName,
+                    smallIcon,
+                    largeIcon,
+                    tagVariableInfos,
                     dynamicAttrsMapName);
         }
 
@@ -437,21 +435,19 @@ class TagFileProcessor {
          * Also, 'name-from' attribute of a variable directive cannot have the
          * same value as that from another variable directive.
          */
-        private void checkUniqueName(String name, String type, Node n)
-                throws JasperException {
+        private void checkUniqueName(String name, String type, Node n) throws JasperException {
             checkUniqueName(name, type, n, null);
         }
 
-        private void checkUniqueName(String name, String type, Node n,
-                TagAttributeInfo attr) throws JasperException {
+        private void checkUniqueName(String name, String type, Node n, TagAttributeInfo attr) throws JasperException {
 
-            HashMap table = (type == VAR_NAME_FROM) ? nameFromTable : nameTable; //NOSONAR
+            HashMap table = (type == VAR_NAME_FROM) ? nameFromTable : nameTable; // NOSONAR
             NameEntry nameEntry = (NameEntry) table.get(name);
             if (nameEntry != null) {
-                if (type != TAG_DYNAMIC || nameEntry.getType() != TAG_DYNAMIC) { //NOSONAR
+                if (type != TAG_DYNAMIC || nameEntry.getType() != TAG_DYNAMIC) { // NOSONAR
                     int line = nameEntry.getNode().getStart().getLineNumber();
-                    err.jspError(n, "jsp.error.tagfile.nameNotUnique", type,
-                            nameEntry.getType(), Integer.toString(line));
+                    err.jspError(
+                            n, "jsp.error.tagfile.nameNotUnique", type, nameEntry.getType(), Integer.toString(line));
                 }
             } else {
                 table.put(name, new NameEntry(type, n, attr));
@@ -467,22 +463,21 @@ class TagFileProcessor {
             while (iter.hasNext()) {
                 String nameFrom = (String) iter.next();
                 NameEntry nameEntry = (NameEntry) nameTable.get(nameFrom);
-                NameEntry nameFromEntry = (NameEntry) nameFromTable
-                        .get(nameFrom);
+                NameEntry nameFromEntry = (NameEntry) nameFromTable.get(nameFrom);
                 Node nameFromNode = nameFromEntry.getNode();
                 if (nameEntry == null) {
-                    err.jspError(nameFromNode,
-                            "jsp.error.tagfile.nameFrom.noAttribute", nameFrom);
+                    err.jspError(nameFromNode, "jsp.error.tagfile.nameFrom.noAttribute", nameFrom);
                 } else {
                     Node node = nameEntry.getNode();
                     TagAttributeInfo tagAttr = nameEntry.getTagAttributeInfo();
                     if (!"java.lang.String".equals(tagAttr.getTypeName())
                             || !tagAttr.isRequired()
                             || tagAttr.canBeRequestTime()) {
-                        err.jspError(nameFromNode,
+                        err.jspError(
+                                nameFromNode,
                                 "jsp.error.tagfile.nameFrom.badAttribute",
-                                nameFrom, Integer.toString(node.getStart()
-                                        .getLineNumber()));
+                                nameFrom,
+                                Integer.toString(node.getStart().getLineNumber()));
                     }
                 }
             }
@@ -505,9 +500,8 @@ class TagFileProcessor {
      *            the TagLibraryInfo object associated with this TagInfo
      * @return a TagInfo object assembled from the directives in the tag file.
      */
-    public static TagInfo parseTagFileDirectives(ParserController pc,
-            String name, String path, TagLibraryInfo tagLibInfo)
-            throws JasperException {
+    public static TagInfo parseTagFileDirectives(
+            ParserController pc, String name, String path, TagLibraryInfo tagLibInfo) throws JasperException {
 
         ErrorDispatcher err = pc.getCompiler().getErrorDispatcher();
 
@@ -520,8 +514,7 @@ class TagFileProcessor {
             err.jspError("jsp.error.file.not.found", path);
         }
 
-        TagFileDirectiveVisitor tagFileVisitor = new TagFileDirectiveVisitor(pc
-                .getCompiler(), tagLibInfo, name, path);
+        TagFileDirectiveVisitor tagFileVisitor = new TagFileDirectiveVisitor(pc.getCompiler(), tagLibInfo, name, path);
         page.visit(tagFileVisitor);
         tagFileVisitor.postCheck();
 
@@ -531,8 +524,8 @@ class TagFileProcessor {
     /**
      * Compiles and loads a tagfile.
      */
-    private void loadTagFile(Compiler compiler, String tagFilePath,
-            Node.CustomTag n, PageInfo parentPageInfo) throws JasperException {
+    private void loadTagFile(Compiler compiler, String tagFilePath, Node.CustomTag n, PageInfo parentPageInfo)
+            throws JasperException {
         JspCompilationContext ctxt = compiler.getCompilationContext();
         JspRuntimeContext rctxt = ctxt.getRuntimeContext();
 
@@ -542,16 +535,19 @@ class TagFileProcessor {
             JspServletWrapper wrapper = rctxt.getWrapper(tagFilePath);
 
             if (wrapper == null) {
-                wrapper = new JspServletWrapper(ctxt.getServletContext(), ctxt
-                      .getOptions(), tagFilePath, n.getTagInfo(), ctxt
-                      .getRuntimeContext(),
-                      ctxt.getTagFileJarUrl(tagFilePath));
+                wrapper = new JspServletWrapper(
+                        ctxt.getServletContext(),
+                        ctxt.getOptions(),
+                        tagFilePath,
+                        n.getTagInfo(),
+                        ctxt.getRuntimeContext(),
+                        ctxt.getTagFileJarUrl(tagFilePath));
                 wrapper.getJspEngineContext().setTagFileUrls(ctxt);
                 wrapper = rctxt.addWrapper(tagFilePath, wrapper);
 
                 // Use same classloader and classpath for compiling tag files
-                //wrapper.getJspEngineContext().setClassLoader(ctxt.getClassLoader());
-                //wrapper.getJspEngineContext().setClassPath(ctxt.getClassPath());
+                // wrapper.getJspEngineContext().setClassLoader(ctxt.getClassLoader());
+                // wrapper.getJspEngineContext().setClassPath(ctxt.getClassPath());
             } else {
                 // Make sure that JspCompilationContext gets the latest TagInfo
                 // for the tag file. TagInfo instance was created the last
@@ -582,21 +578,21 @@ class TagFileProcessor {
                             n.getTagInfo().getSmallIcon(),
                             n.getTagInfo().getLargeIcon(),
                             n.getTagInfo().getTagVariableInfos(),
-                            ((JasperTagInfo)n.getTagInfo()).getDynamicAttributesMapName());
+                            ((JasperTagInfo) n.getTagInfo()).getDynamicAttributesMapName());
 
                     JspServletWrapper tempWrapper = new JspServletWrapper(
                             ctxt.getServletContext(),
                             ctxt.getOptions(),
                             tagFilePath,
-                          tempTagInfo,
-                          ctxt.getRuntimeContext(),
-                          ctxt.getTagFileJarUrl(tempTagFilePath));
+                            tempTagInfo,
+                            ctxt.getRuntimeContext(),
+                            ctxt.getTagFileJarUrl(tempTagFilePath));
                     tempWrapper.getJspEngineContext().setTagFileUrls(ctxt);
                     tagClazz = tempWrapper.loadTagFilePrototype();
                     tempVector.add(tempWrapper.getJspEngineContext().getCompiler());
                     String name = JspUtil.getCanonicalName(tagClazz);
                     final int underscorePos = name.lastIndexOf(postfix);
-                    if ( underscorePos > -1 ) {
+                    if (underscorePos > -1) {
                         n.setTagHandlerClassName(name.substring(0, underscorePos));
                     }
                 } else {
@@ -612,8 +608,7 @@ class TagFileProcessor {
             try {
                 Object tagIns = tagClazz.newInstance();
                 if (tagIns instanceof JspSourceDependent) {
-                    Iterator iter = ((List) ((JspSourceDependent) tagIns)
-                          .getDependants()).iterator();
+                    Iterator iter = ((List) ((JspSourceDependent) tagIns).getDependants()).iterator();
                     while (iter.hasNext()) {
                         parentPageInfo.addDependant((String) iter.next());
                     }
@@ -656,7 +651,6 @@ class TagFileProcessor {
                     pageInfo.addDependant(tagFilePath);
                 }
                 loadTagFile(compiler, tagFilePath, n, pageInfo);
-
             }
             visitBody(n);
         }
@@ -668,8 +662,7 @@ class TagFileProcessor {
      * assumed to have been processed and encapsulated as TagFileInfo in the
      * CustomTag nodes.
      */
-    public void loadTagFiles(Compiler compiler, Node.Nodes page)
-            throws JasperException {
+    public void loadTagFiles(Compiler compiler, Node.Nodes page) throws JasperException {
 
         tempVector = new Vector<>();
         page.visit(new TagFileLoaderVisitor(compiler));

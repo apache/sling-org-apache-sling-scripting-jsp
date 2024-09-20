@@ -1,33 +1,33 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
 package org.apache.sling.scripting.jsp.jasper.compiler;
 
 /**
  * This class implements a parser for EL expressions.
- * 
+ *
  * It takes strings of the form xxx${..}yyy${..}zzz etc, and turn it into a
  * ELNode.Nodes.
- * 
+ *
  * Currently, it only handles text outside ${..} and functions in ${ ..}.
- * 
+ *
  * @author Kin-man Chung
  */
-
 public class ELParser {
 
     private Token curToken; // current token
@@ -39,14 +39,29 @@ public class ELParser {
     private int index; // Current index of the expression
 
     private String expression; // The EL expression
-    
+
     private char type;
 
     private boolean escapeBS; // is '\' an escape char in text outside EL?
 
-    private static final String reservedWords[] = { "and", "div", "empty",
-            "eq", "false", "ge", "gt", "instanceof", "le", "lt", "mod", "ne",
-            "not", "null", "or", "true" };
+    private static final String reservedWords[] = {
+        "and",
+        "div",
+        "empty",
+        "eq",
+        "false",
+        "ge",
+        "gt",
+        "instanceof",
+        "le",
+        "lt",
+        "mod",
+        "ne",
+        "not",
+        "null",
+        "or",
+        "true"
+    };
 
     public ELParser(String expression) {
         index = 0;
@@ -56,7 +71,7 @@ public class ELParser {
 
     /**
      * Parse an EL expression
-     * 
+     *
      * @param expression
      *            The input expression string of the form Char* ('${' Char*
      *            '}')* Char*
@@ -79,7 +94,7 @@ public class ELParser {
 
     /**
      * Parse an EL expression string '${...}'
-     * 
+     *
      * @return An ELNode.Nodes representing the EL expression TODO: Currently
      *         only parsed into functions and text strings. This should be
      *         rewritten for a full parser.
@@ -171,7 +186,7 @@ public class ELParser {
     /**
      * Skip until an EL expression ('${' || '#{') is reached, allowing escape
      * sequences '\\' and '\$' and '\#'.
-     * 
+     *
      * @return The text string up to the EL expression
      */
     private String skipUntilEL() {
@@ -183,8 +198,7 @@ public class ELParser {
                 prev = 0;
                 if (ch == '\\') {
                     buf.append('\\');
-                    if (!escapeBS)
-                        prev = '\\';
+                    if (!escapeBS) prev = '\\';
                 } else if (ch == '$' || ch == '#') {
                     buf.append(ch);
                 }
@@ -229,8 +243,7 @@ public class ELParser {
             if (Character.isJavaIdentifierStart(ch)) {
                 StringBuffer buf = new StringBuffer();
                 buf.append(ch);
-                while ((ch = peekChar()) != -1
-                        && Character.isJavaIdentifierPart(ch)) {
+                while ((ch = peekChar()) != -1 && Character.isJavaIdentifierPart(ch)) {
                     buf.append(ch);
                     nextChar();
                 }
@@ -279,8 +292,7 @@ public class ELParser {
 
     private void skipSpaces() {
         while (hasNextChar()) {
-            if (expression.charAt(index) > ' ')
-                break;
+            if (expression.charAt(index) > ' ') break;
             index++;
         }
     }

@@ -1,28 +1,21 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * ====================================================================
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * This software consists of voluntary contributions made by many
- * individuals on behalf of the Apache Software Foundation and was
- * originally based on software copyright (c) 1999, International
- * Business Machines, Inc., http://www.apache.org.  For more
- * information on the Apache Software Foundation, please see
- * <http://www.apache.org/>.
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
 package org.apache.sling.scripting.jsp.jasper.xmlparser;
 
 /**
@@ -32,22 +25,21 @@ package org.apache.sling.scripting.jsp.jasper.xmlparser;
  * expecting an XMLString object. This is a safe operation because
  * it is assumed that any callee will <strong>not</strong> modify
  * the contents of the XMLString structure.
- * <p> 
+ * <p>
  * The contents of the string are managed by the string buffer. As
  * characters are appended, the string buffer will grow as needed.
  * <p>
- * <strong>Note:</strong> Never set the <code>ch</code>, 
+ * <strong>Note:</strong> Never set the <code>ch</code>,
  * <code>offset</code>, and <code>length</code> fields directly.
  * These fields are managed by the string buffer. In order to reset
  * the buffer, call <code>clear()</code>.
- * 
+ *
  * @author Andy Clark, IBM
  * @author Eric Ye, IBM
  *
  * @version $Id: XMLStringBuffer.java 467222 2006-10-24 03:17:11Z markt $
  */
-public class XMLStringBuffer
-    extends XMLString {
+public class XMLStringBuffer extends XMLString {
 
     //
     // Constants
@@ -61,16 +53,16 @@ public class XMLStringBuffer
     //
 
     /**
-     * 
+     *
      */
     public XMLStringBuffer() {
         this(DEFAULT_SIZE);
     } // <init>()
 
     /**
-     * 
-     * 
-     * @param size 
+     *
+     *
+     * @param size
      */
     public XMLStringBuffer(int size) {
         ch = new char[size];
@@ -112,17 +104,16 @@ public class XMLStringBuffer
 
     /**
      * append
-     * 
-     * @param c 
+     *
+     * @param c
      */
     public void append(char c) {
         if (this.length + 1 > this.ch.length) {
-                    int newLength = this.ch.length*2;
-                    if (newLength < this.ch.length + DEFAULT_SIZE)
-                        newLength = this.ch.length + DEFAULT_SIZE;
-                    char[] newch = new char[newLength];
-                    System.arraycopy(this.ch, 0, newch, 0, this.length);
-                    this.ch = newch;
+            int newLength = this.ch.length * 2;
+            if (newLength < this.ch.length + DEFAULT_SIZE) newLength = this.ch.length + DEFAULT_SIZE;
+            char[] newch = new char[newLength];
+            System.arraycopy(this.ch, 0, newch, 0, this.length);
+            this.ch = newch;
         }
         this.ch[this.length] = c;
         this.length++;
@@ -130,16 +121,15 @@ public class XMLStringBuffer
 
     /**
      * append
-     * 
-     * @param s 
+     *
+     * @param s
      */
     public void append(String s) {
         int length = s.length();
         if (this.length + length > this.ch.length) {
-            int newLength = this.ch.length*2;
-            if (newLength < this.length + length + DEFAULT_SIZE)
-                newLength = this.ch.length + length + DEFAULT_SIZE;
-            char[] newch = new char[newLength];            
+            int newLength = this.ch.length * 2;
+            if (newLength < this.length + length + DEFAULT_SIZE) newLength = this.ch.length + length + DEFAULT_SIZE;
+            char[] newch = new char[newLength];
             System.arraycopy(this.ch, 0, newch, 0, this.length);
             this.ch = newch;
         }
@@ -149,10 +139,10 @@ public class XMLStringBuffer
 
     /**
      * append
-     * 
-     * @param ch 
-     * @param offset 
-     * @param length 
+     *
+     * @param ch
+     * @param offset
+     * @param length
      */
     public void append(char[] ch, int offset, int length) {
         if (this.length + length > this.ch.length) {
@@ -166,11 +156,10 @@ public class XMLStringBuffer
 
     /**
      * append
-     * 
-     * @param s 
+     *
+     * @param s
      */
     public void append(XMLString s) {
         append(s.ch, s.offset, s.length);
     } // append(XMLString)
-
 } // class XMLStringBuffer

@@ -1,20 +1,21 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
 package org.apache.sling.scripting.jsp.jasper.runtime;
 
 import javax.servlet.ServletConfig;
@@ -34,8 +35,8 @@ public class TagHandlerPool {
 
     private Tag[] handlers;
 
-    public static String OPTION_TAGPOOL="tagpoolClassName";
-    public static String OPTION_MAXSIZE="tagpoolMaxSize";
+    public static String OPTION_TAGPOOL = "tagpoolClassName";
+    public static String OPTION_MAXSIZE = "tagpoolMaxSize";
 
     private Log log = LogFactory.getLog(TagHandlerPool.class);
 
@@ -43,37 +44,37 @@ public class TagHandlerPool {
     private int current;
     protected AnnotationProcessor annotationProcessor = null;
 
-    public static TagHandlerPool getTagHandlerPool( ServletConfig config) {
+    public static TagHandlerPool getTagHandlerPool(ServletConfig config) {
         final TagHandlerPool result = new TagHandlerPool();
         result.init(config);
 
         return result;
     }
 
-    protected void init( ServletConfig config ) {
-        int maxSize=-1;
-        String maxSizeS=getOption(config, OPTION_MAXSIZE, null);
-        if( maxSizeS != null ) {
+    protected void init(ServletConfig config) {
+        int maxSize = -1;
+        String maxSizeS = getOption(config, OPTION_MAXSIZE, null);
+        if (maxSizeS != null) {
             try {
-                maxSize=Integer.parseInt(maxSizeS);
-            } catch( Exception ex) {
-                maxSize=-1;
+                maxSize = Integer.parseInt(maxSizeS);
+            } catch (Exception ex) {
+                maxSize = -1;
             }
         }
-        if( maxSize <0  ) {
-            maxSize=Constants.MAX_POOL_SIZE;
+        if (maxSize < 0) {
+            maxSize = Constants.MAX_POOL_SIZE;
         }
         this.handlers = new Tag[maxSize];
         this.current = -1;
         this.annotationProcessor =
-            (AnnotationProcessor) config.getServletContext().getAttribute(AnnotationProcessor.class.getName());
+                (AnnotationProcessor) config.getServletContext().getAttribute(AnnotationProcessor.class.getName());
     }
 
     /**
      * Constructs a tag handler pool with the default capacity.
      */
     public TagHandlerPool() {
-	// Nothing - jasper generated servlets call the other constructor,
+        // Nothing - jasper generated servlets call the other constructor,
         // this should be used in future + init .
     }
 
@@ -85,8 +86,8 @@ public class TagHandlerPool {
      */
     @Deprecated
     public TagHandlerPool(int capacity) {
-	this.handlers = new Tag[capacity];
-	this.current = -1;
+        this.handlers = new Tag[capacity];
+        this.current = -1;
     }
 
     /**
@@ -100,8 +101,8 @@ public class TagHandlerPool {
      * @throws JspException if a tag handler cannot be instantiated
      */
     public Tag get(Class handlerClass) throws JspException {
-	Tag handler = null;
-        synchronized( this ) {
+        Tag handler = null;
+        synchronized (this) {
             if (current >= 0) {
                 handler = handlers[current--];
                 return handler;
@@ -127,7 +128,7 @@ public class TagHandlerPool {
      * @param handler Tag handler to add to this tag handler pool
      */
     public void reuse(Tag handler) {
-        synchronized( this ) {
+        synchronized (this) {
             if (current < (handlers.length - 1)) {
                 handlers[++current] = handler;
                 return;
@@ -139,8 +140,10 @@ public class TagHandlerPool {
             try {
                 AnnotationHelper.preDestroy(annotationProcessor, handler);
             } catch (Exception e) {
-                log.warn("Error processing preDestroy on tag instance of "
-                        + handler.getClass().getName(), e);
+                log.warn(
+                        "Error processing preDestroy on tag instance of "
+                                + handler.getClass().getName(),
+                        e);
             }
         }
     }
@@ -156,24 +159,23 @@ public class TagHandlerPool {
                 try {
                     AnnotationHelper.preDestroy(annotationProcessor, handlers[i]);
                 } catch (Exception e) {
-                    log.warn("Error processing preDestroy on tag instance of "
-                            + handlers[i].getClass().getName(), e);
+                    log.warn(
+                            "Error processing preDestroy on tag instance of "
+                                    + handlers[i].getClass().getName(),
+                            e);
                 }
             }
         }
     }
 
-    protected static String getOption( ServletConfig config, String name, String defaultV) {
-        if( config == null ) return defaultV;
+    protected static String getOption(ServletConfig config, String name, String defaultV) {
+        if (config == null) return defaultV;
 
-        String value=config.getInitParameter(name);
-        if( value != null ) return value;
-        if( config.getServletContext() ==null )
-            return defaultV;
-        value=config.getServletContext().getInitParameter(name);
-        if( value!=null ) return value;
+        String value = config.getInitParameter(name);
+        if (value != null) return value;
+        if (config.getServletContext() == null) return defaultV;
+        value = config.getServletContext().getInitParameter(name);
+        if (value != null) return value;
         return defaultV;
     }
-
 }
-
