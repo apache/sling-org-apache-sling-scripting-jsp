@@ -24,7 +24,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -42,6 +41,8 @@ import javax.servlet.jsp.tagext.TagInfo;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.apache.sling.api.SlingException;
+import org.apache.sling.api.SlingIOException;
+import org.apache.sling.api.SlingServletException;
 import org.apache.sling.api.scripting.ScriptEvaluationException;
 import org.apache.sling.api.scripting.SlingBindings;
 import org.apache.sling.commons.classloader.DynamicClassLoader;
@@ -462,19 +463,10 @@ public class JspServletWrapper {
     public void service(final SlingBindings bindings) {
         try {
             service(bindings.getRequest(), bindings.getResponse());
-        } catch ( final ServletException se ) {
-            if ( se.getRootCause() != null ) {
-                final Throwable t = se.getRootCause();
-                if( t instanceof Exception ) {
-                    handleJspException((Exception)t);
-                }
-            }
-            handleJspException(se);
-        } catch ( final SlingPageException se) {
-            // don't handle SlingPageExceptions, just rethrow
-            throw se;
-        } catch (final Exception ex) {
-            handleJspException(ex);
+        } catch (IOException ioe) {
+            throw new SlingIOException(ioe);
+        } catch (ServletException se) {
+            throw new SlingServletException(se);
         }
     }
 
@@ -598,15 +590,6 @@ public class JspServletWrapper {
         }
     }
 
-    private RuntimeException wrapException(final Exception e) {
-        if ( e instanceof RuntimeException ) {
-            return (RuntimeException) e;
-        }
-        // wrap in ScriptEvaluationException
-        return new ScriptEvaluationException(this.ctxt.getJspFile(),
-            e.getMessage() == null ? e.toString() : e.getMessage(), e);
-    }
-
     /**
      * <p>Attempts to construct a JasperException that contains helpful information
      * about what went wrong. Uses the JSP compiler system to translate the line
@@ -618,13 +601,42 @@ public class JspServletWrapper {
      *</p>
      *
      * @param ex the exception that was the cause of the problem.
-     * @throws a SlingException Wrapping the original exception
+     * @throws ServletException with more detailed information
      */
-    protected void handleJspException(final Exception ex) {
-        RuntimeException result = null;
+    protected void handleJspException(final Exception ex)
+            throws ServletException {
+        final Exception jspEx = handleJspExceptionInternal(ex);
+        if ( jspEx instanceof ServletException ) {
+            throw (ServletException)jspEx;
+        }
+        throw (SlingException)jspEx;
+    }
+
+    /**
+     * Returns only a ServletException or a SlingException
+     */
+    private Exception handleJspExceptionInternal(final Exception ex) {
+        Throwable realException = ex;
+        String exMessage = realException.getMessage();
+        if (ex instanceof ServletException) {
+            realException = ((ServletException) ex).getRootCause();
+            // root cause might be null (eg. for a JasperException ex)
+            if (realException == null) {
+                realException = ex;
+            } else {
+                exMessage = ex.toString();
+            }
+        }
+
+        // avoid nested ScriptEvaluationExceptions (eg. in nested jsp includes)
+        while (realException instanceof ScriptEvaluationException) {
+            realException = realException.getCause();
+            exMessage = realException.getMessage();
+        }
+
         try {
             // First identify the stack frame in the trace that represents the JSP
-            final StackTraceElement[] frames = ex.getStackTrace();
+            StackTraceElement[] frames = realException.getStackTrace();
             StackTraceElement jspFrame = null;
 
             for (int i=0; i<frames.length; ++i) {
@@ -634,41 +646,50 @@ public class JspServletWrapper {
                 }
             }
 
-            // If we couldn't find a frame in the stack trace corresponding
-            // to the generated servlet class, we can't really add anything
-            if (jspFrame != null) {
-                final int javaLineNumber = jspFrame.getLineNumber();
-                final JavacErrorDetail detail = ErrorDispatcher.createJavacError(
-                        jspFrame.getMethodName(),
-                        this.ctxt.activateCompiler().getPageNodes(),
-                        null,
-                        javaLineNumber,
-                        ctxt);
-
-                // If the line number is less than one we couldn't find out
-                // where in the JSP things went wrong
-                final int jspLineNumber = detail.getJspBeginLineNumber();
-                if (jspLineNumber > 0) {
-                    final String origMsg = ex.getMessage() == null ? ex.toString() : ex.getMessage();
-                    final String message;
-                    if (options.getDisplaySourceFragment() && detail.getJspExtract() != null ) {
-                        message = Localizer.getMessage("jsp.exception", detail.getJspFileName(), String.valueOf(jspLineNumber))
-                                .concat(" : ").concat(origMsg).concat("\n\n").concat(detail.getJspExtract()).concat("\n");
-
-                    } else {
-                        message = Localizer.getMessage("jsp.exception", detail.getJspFileName(), String.valueOf(jspLineNumber))
-                                .concat(" : ").concat(origMsg);
-                    }
-                    result = new SlingException(message, ex);
+            if (jspFrame == null) {
+                // If we couldn't find a frame in the stack trace corresponding
+                // to the generated servlet class, we can't really add anything
+                if ( ex instanceof ServletException ) {
+                    return ex;
                 }
+                return new SlingException(ex.getMessage(), ex);
             }
+            int javaLineNumber = jspFrame.getLineNumber();
+            JavacErrorDetail detail = ErrorDispatcher.createJavacError(
+                    jspFrame.getMethodName(),
+                    this.ctxt.getCompiler().getPageNodes(),
+                    null,
+                    javaLineNumber,
+                    ctxt);
+
+            // If the line number is less than one we couldn't find out
+            // where in the JSP things went wrong
+            int jspLineNumber = detail.getJspBeginLineNumber();
+            if (jspLineNumber < 1) {
+                if ( realException instanceof ServletException ) {
+                    return (ServletException)realException;
+                }
+                return new SlingException(exMessage, realException);
+            }
+
+            if (options.getDisplaySourceFragment() && detail.getJspExtract() != null ) {
+                return new SlingException(Localizer.getMessage
+                        ("jsp.exception", detail.getJspFileName(),
+                                "" + jspLineNumber) +
+                        "\n\n" + detail.getJspExtract() +
+                        "\n", realException);
+
+            }
+            return new SlingException(Localizer.getMessage
+                    ("jsp.exception", detail.getJspFileName(),
+                            "" + jspLineNumber), realException);
         } catch (final Exception je) {
             // If anything goes wrong, just revert to the original behaviour
+            if (realException instanceof ServletException) {
+                return (ServletException)realException;
+            }
+            return new SlingException(exMessage, realException);
         }
-        if ( result == null ) {
-            result = wrapException(ex);
-        }
-        throw result;
     }
 
     /**
