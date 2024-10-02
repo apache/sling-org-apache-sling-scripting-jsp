@@ -207,19 +207,7 @@ public class JspCompilationContext {
     }
 
     public Compiler getCompiler() {
-        return this.jspCompiler;
-    }
-
-    public Compiler activateCompiler() {
-        if ( jspCompiler == null ) {
-            synchronized ( this ) {
-                if ( jspCompiler == null ) {
-                    // create compile and compile
-                    this.compile(); // we ignore the exception
-                }
-            }
-        }
-        return jspCompiler;
+        return createCompiler();
     }
 
     /** ---------- Access resources in the webapp ---------- */
