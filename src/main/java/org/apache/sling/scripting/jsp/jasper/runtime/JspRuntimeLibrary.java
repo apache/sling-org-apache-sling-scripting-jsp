@@ -23,8 +23,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Method;
-import java.security.AccessController;
-import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Enumeration;
 
@@ -37,7 +35,6 @@ import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.BodyContent;
 
-import org.apache.sling.scripting.jsp.jasper.Constants;
 import org.apache.sling.scripting.jsp.jasper.JasperException;
 import org.apache.sling.scripting.jsp.jasper.compiler.Localizer;
 
