@@ -41,6 +41,7 @@ public final class ELResolverImpl extends ELResolver {
 		((CompositeELResolver) DefaultResolver).add(new ResourceBundleELResolver());
 		((CompositeELResolver) DefaultResolver).add(new ListELResolver());
 		((CompositeELResolver) DefaultResolver).add(new ArrayELResolver());
+		((CompositeELResolver) DefaultResolver).add(new RecordELResolver());
 		((CompositeELResolver) DefaultResolver).add(new BeanELResolver());
 	}
 
