@@ -38,6 +38,7 @@ import javax.servlet.jsp.el.ScopedAttributeELResolver;
 
 import org.apache.el.ExpressionFactoryImpl;
 import org.apache.sling.scripting.jsp.jasper.el.ELContextImpl;
+import org.apache.sling.scripting.jsp.jasper.el.RecordELResolver;
 
 /**
  * Implementation of JspApplicationContext
@@ -113,6 +114,7 @@ public class JspApplicationContextImpl implements JspApplicationContext {
 			r.add(new ResourceBundleELResolver());
 			r.add(new ListELResolver());
 			r.add(new ArrayELResolver());	
+			r.add(new RecordELResolver());
 			r.add(new BeanELResolver());
 			r.add(new ScopedAttributeELResolver());
 			this.resolver = r;
