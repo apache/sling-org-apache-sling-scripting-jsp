@@ -19,6 +19,9 @@
 package org.apache.sling.scripting.jsp.jasper.el;
 
 import java.beans.FeatureDescriptor;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -38,6 +41,10 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+/**
+ * Most tests use a {@link FakeRecord}, so they run on every JVM. The tests at the end use real
+ * records, which are skipped on JVMs without records.
+ */
 public class RecordELResolverTest {
 
     @ClassRule
@@ -48,66 +55,36 @@ public class RecordELResolverTest {
 
     @Before
     public void setUp() {
-        resolver = new RecordELResolver();
+        resolver = new RecordELResolver(RecordELResolverTest::fakeRecordAccessors);
         context = new ELContextImpl(resolver);
     }
 
-    // records
-
     @Test
-    public void getValueReturnsComponent() throws Exception {
-        Object person = RECORDS.person("Alice", 42);
-
-        assertEquals("Alice", resolver.getValue(context, person, "name"));
+    public void getValueReturnsComponent() {
+        assertEquals("Alice", resolver.getValue(context, new FakeRecord(), "name"));
         assertTrue(context.isPropertyResolved());
     }
 
     @Test
-    public void getValueReturnsPrimitiveComponent() throws Exception {
-        Object person = RECORDS.person("Alice", 42);
-
-        assertEquals(42, resolver.getValue(context, person, "age"));
+    public void getValueReturnsPrimitiveComponent() {
+        assertEquals(42, resolver.getValue(context, new FakeRecord(), "age"));
         assertTrue(context.isPropertyResolved());
     }
 
     @Test
-    public void getValueOfNonPublicRecord() throws Exception {
-        Object hidden = RECORDS.create(TestRecords.HIDDEN, "s3cr3t");
+    public void getValueLeavesNonComponentsToOtherResolvers() {
+        for (String property : Arrays.asList("greeting", "unknown", null)) {
+            ELContext context = new ELContextImpl(resolver);
 
-        assertEquals("s3cr3t", resolver.getValue(context, hidden, "secret"));
-        assertTrue(context.isPropertyResolved());
+            assertNull(property, resolver.getValue(context, new FakeRecord(), property));
+            assertFalse(property, context.isPropertyResolved());
+        }
     }
 
     @Test
-    public void getValueLeavesGetterToOtherResolvers() throws Exception {
-        Object person = RECORDS.person("Alice", 42);
-
-        assertNull(resolver.getValue(context, person, "greeting"));
-        assertFalse(context.isPropertyResolved());
-    }
-
-    @Test
-    public void getValueLeavesUnknownPropertyToOtherResolvers() throws Exception {
-        Object person = RECORDS.person("Alice", 42);
-
-        assertNull(resolver.getValue(context, person, "unknown"));
-        assertFalse(context.isPropertyResolved());
-    }
-
-    @Test
-    public void getValueLeavesNullPropertyToOtherResolvers() throws Exception {
-        Object person = RECORDS.person("Alice", 42);
-
-        assertNull(resolver.getValue(context, person, null));
-        assertFalse(context.isPropertyResolved());
-    }
-
-    @Test
-    public void getValueWrapsExceptionOfAccessor() throws Exception {
-        Object failing = RECORDS.create(TestRecords.FAILING, "value");
-
+    public void getValueWrapsExceptionOfAccessor() {
         try {
-            resolver.getValue(context, failing, "value");
+            resolver.getValue(context, new FakeRecord(), "failing");
             fail("expected ELException");
         } catch (ELException e) {
             assertTrue(e.getCause() instanceof IllegalStateException);
@@ -117,66 +94,67 @@ public class RecordELResolverTest {
     }
 
     @Test
-    public void getTypeReturnsComponentType() throws Exception {
-        Object person = RECORDS.person("Alice", 42);
+    public void getValueWrapsInaccessibleAccessor() throws Exception {
+        // public method of a package private class in another package
+        Method inaccessible = Class.forName("java.util.Collections$UnmodifiableCollection").getDeclaredMethod("size");
+        RecordELResolver resolver = new RecordELResolver(type -> Collections.singletonMap("size", inaccessible));
 
-        assertEquals(String.class, resolver.getType(context, person, "name"));
-        assertEquals(int.class, resolver.getType(context, person, "age"));
+        try {
+            resolver.getValue(context, Collections.unmodifiableList(Collections.emptyList()), "size");
+            fail("expected ELException");
+        } catch (ELException e) {
+            assertTrue(e.getCause() instanceof IllegalAccessException);
+        }
+    }
+
+    @Test
+    public void getTypeReturnsComponentType() {
+        assertEquals(String.class, resolver.getType(context, new FakeRecord(), "name"));
+        assertEquals(int.class, resolver.getType(context, new FakeRecord(), "age"));
         assertTrue(context.isPropertyResolved());
     }
 
     @Test
-    public void getTypeLeavesUnknownPropertyToOtherResolvers() throws Exception {
-        Object person = RECORDS.person("Alice", 42);
-
-        assertNull(resolver.getType(context, person, "unknown"));
+    public void getTypeLeavesUnknownPropertyToOtherResolvers() {
+        assertNull(resolver.getType(context, new FakeRecord(), "unknown"));
         assertFalse(context.isPropertyResolved());
     }
 
     @Test
-    public void setValueIsNotAllowed() throws Exception {
-        Object person = RECORDS.person("Alice", 42);
+    public void setValueIsNotAllowed() {
+        FakeRecord record = new FakeRecord();
 
         try {
-            resolver.setValue(context, person, "name", "Bob");
+            resolver.setValue(context, record, "name", "Bob");
             fail("expected PropertyNotWritableException");
         } catch (PropertyNotWritableException e) {
             assertTrue(e.getMessage(), e.getMessage().contains("'name'"));
         }
         assertTrue(context.isPropertyResolved());
-        assertEquals("Alice", resolver.getValue(context, person, "name"));
     }
 
     @Test
-    public void setValueLeavesUnknownPropertyToOtherResolvers() throws Exception {
-        Object person = RECORDS.person("Alice", 42);
-
-        resolver.setValue(context, person, "unknown", "value");
+    public void setValueLeavesUnknownPropertyToOtherResolvers() {
+        resolver.setValue(context, new FakeRecord(), "unknown", "value");
         assertFalse(context.isPropertyResolved());
     }
 
     @Test
-    public void isReadOnlyForComponent() throws Exception {
-        Object person = RECORDS.person("Alice", 42);
-
-        assertTrue(resolver.isReadOnly(context, person, "name"));
+    public void isReadOnlyForComponent() {
+        assertTrue(resolver.isReadOnly(context, new FakeRecord(), "name"));
         assertTrue(context.isPropertyResolved());
     }
 
     @Test
-    public void isReadOnlyLeavesUnknownPropertyToOtherResolvers() throws Exception {
-        Object person = RECORDS.person("Alice", 42);
-
-        assertFalse(resolver.isReadOnly(context, person, "unknown"));
+    public void isReadOnlyLeavesUnknownPropertyToOtherResolvers() {
+        assertFalse(resolver.isReadOnly(context, new FakeRecord(), "unknown"));
         assertFalse(context.isPropertyResolved());
     }
 
     @Test
-    public void getFeatureDescriptorsDescribesComponents() throws Exception {
-        Object person = RECORDS.person("Alice", 42);
-
+    public void getFeatureDescriptorsDescribesComponents() {
         Map<String, Object> types = new HashMap<String, Object>();
-        for (Iterator<FeatureDescriptor> it = resolver.getFeatureDescriptors(context, person); it.hasNext();) {
+        for (Iterator<FeatureDescriptor> it = resolver.getFeatureDescriptors(context, new FakeRecord()); it.hasNext();) {
             FeatureDescriptor descriptor = it.next();
             assertEquals(Boolean.TRUE, descriptor.getValue(ELResolver.RESOLVABLE_AT_DESIGN_TIME));
             types.put(descriptor.getName(), descriptor.getValue(ELResolver.TYPE));
@@ -185,17 +163,14 @@ public class RecordELResolverTest {
         Map<String, Object> expected = new HashMap<String, Object>();
         expected.put("name", String.class);
         expected.put("age", int.class);
+        expected.put("failing", String.class);
         assertEquals(expected, types);
     }
 
     @Test
-    public void getCommonPropertyTypeOfRecord() throws Exception {
-        Object person = RECORDS.person("Alice", 42);
-
-        assertEquals(Object.class, resolver.getCommonPropertyType(context, person));
+    public void getCommonPropertyTypeOfRecord() {
+        assertEquals(Object.class, resolver.getCommonPropertyType(context, new FakeRecord()));
     }
-
-    // no records, these run on every JVM
 
     @Test
     public void nonRecordIsLeftToOtherResolvers() {
@@ -223,27 +198,114 @@ public class RecordELResolverTest {
 
     @Test(expected = NullPointerException.class)
     public void getValueRequiresContext() {
-        resolver.getValue(null, new Bean(), "name");
+        resolver.getValue(null, new FakeRecord(), "name");
     }
 
     @Test(expected = NullPointerException.class)
     public void getTypeRequiresContext() {
-        resolver.getType(null, new Bean(), "name");
+        resolver.getType(null, new FakeRecord(), "name");
     }
 
     @Test(expected = NullPointerException.class)
     public void setValueRequiresContext() {
-        resolver.setValue(null, new Bean(), "name", "value");
+        resolver.setValue(null, new FakeRecord(), "name", "value");
     }
 
     @Test(expected = NullPointerException.class)
     public void isReadOnlyRequiresContext() {
-        resolver.isReadOnly(null, new Bean(), "name");
+        resolver.isReadOnly(null, new FakeRecord(), "name");
+    }
+
+    // real records, skipped on JVMs without records
+
+    @Test
+    public void recordComponentsAreResolved() throws Exception {
+        RecordELResolver resolver = new RecordELResolver();
+        Object person = RECORDS.person("Alice", 42);
+
+        assertEquals("Alice", resolver.getValue(context, person, "name"));
+        assertEquals(42, resolver.getValue(context, person, "age"));
+        assertTrue(context.isPropertyResolved());
+    }
+
+    @Test
+    public void recordGetterIsNotAComponent() throws Exception {
+        RecordELResolver resolver = new RecordELResolver();
+
+        assertNull(resolver.getValue(context, RECORDS.person("Alice", 42), "greeting"));
+        assertFalse(context.isPropertyResolved());
+    }
+
+    @Test
+    public void nonPublicRecordIsNotResolved() throws Exception {
+        RecordELResolver resolver = new RecordELResolver();
+
+        assertNull(resolver.getValue(context, RECORDS.create(TestRecords.HIDDEN, "s3cr3t"), "secret"));
+        assertFalse(context.isPropertyResolved());
+    }
+
+    @Test
+    public void classIsNotARecord() {
+        assertTrue(RecordELResolver.findRecordAccessors(FakeRecord.class).isEmpty());
+    }
+
+    @Test
+    public void isPublicRequiresPublicTypeAndEnclosingClasses() {
+        assertTrue(RecordELResolver.isPublic(RecordELResolverTest.class));
+        assertTrue(RecordELResolver.isPublic(FakeRecord.class));
+        assertFalse(RecordELResolver.isPublic(Private.class));
+        assertFalse(RecordELResolver.isPublic(Private.Nested.class));
+    }
+
+    @Test
+    public void findMethod() throws Exception {
+        assertEquals(Object.class.getMethod("toString"), RecordELResolver.findMethod("java.lang.Object", "toString"));
+        assertNull(RecordELResolver.findMethod("java.lang.Object", "unknown"));
+        assertNull(RecordELResolver.findMethod("java.lang.Unknown", "toString"));
+    }
+
+    /** A class with record style accessors, which {@link #fakeRecordAccessors} treats as a record. */
+    public static class FakeRecord {
+        public String name() {
+            return "Alice";
+        }
+
+        public int age() {
+            return 42;
+        }
+
+        public String failing() {
+            throw new IllegalStateException("accessor failed");
+        }
+
+        public String getGreeting() {
+            return "Hello Alice";
+        }
     }
 
     public static class Bean {
         public String getName() {
             return "bean";
         }
+    }
+
+    private static class Private {
+        public static class Nested {
+        }
+    }
+
+    private static Map<String, Method> fakeRecordAccessors(Class<?> type) {
+        if (type != FakeRecord.class) {
+            return Collections.emptyMap();
+        }
+        Map<String, Method> accessors = new HashMap<String, Method>();
+        for (String component : Arrays.asList("name", "age", "failing")) {
+            try {
+                accessors.put(component, FakeRecord.class.getMethod(component));
+            } catch (NoSuchMethodException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+        return accessors;
     }
 }

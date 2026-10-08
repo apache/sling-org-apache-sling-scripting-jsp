@@ -53,9 +53,6 @@ public class TestRecords extends ExternalResource {
     /** A package private record. */
     public static final String HIDDEN = "records.Hidden";
 
-    /** A record whose accessor throws an {@link IllegalStateException}. */
-    public static final String FAILING = "records.Failing";
-
     private static final Map<String, String> SOURCES = new LinkedHashMap<String, String>();
 
     static {
@@ -65,10 +62,6 @@ public class TestRecords extends ExternalResource {
                 + "}\n");
         SOURCES.put(HIDDEN, "package records;\n"
                 + "record Hidden(String secret) {}\n");
-        SOURCES.put(FAILING, "package records;\n"
-                + "public record Failing(String value) {\n"
-                + "    public String value() { throw new IllegalStateException(\"accessor failed\"); }\n"
-                + "}\n");
     }
 
     private final TemporaryFolder folder = new TemporaryFolder();
